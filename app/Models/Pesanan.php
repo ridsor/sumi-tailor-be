@@ -12,8 +12,13 @@ class Pesanan extends Model
     protected $table = 'pesanan';
     protected $guarded = ['id'];
 
-    public function getCompanyID()
-    {
-        return sprintf('ST%03d', $this->id);
-    }
+    public static function boot()
+{
+    parent::boot();
+
+    static::created(function($pesanan) {
+        $pesanan->kode_barang = 'ST' . sprintf('%03d',$pesanan->id);
+        $pesanan->save();
+    });
+}
 }
