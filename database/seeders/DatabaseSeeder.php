@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 
 use App\Models\User;
-use App\Models\AccessTokens;
+use App\Models\Pesanan;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,5 +21,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@gmail.com',
             'password' => 'password'
         ]);
+
+        Pesanan::factory(5)->create();
     }
 }

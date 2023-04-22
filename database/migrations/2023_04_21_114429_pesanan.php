@@ -15,7 +15,7 @@ class Pesanan extends Migration
     {
         Schema::create('pesanan', function(Blueprint $table) {
             $table->id();
-            $table->string('kode_barang',10)->unique();
+            $table->string('kode_barang',10)->default('');
             $table->string('nama',100);
             $table->text('deskripsi')->nullable();
             $table->integer('harga');
