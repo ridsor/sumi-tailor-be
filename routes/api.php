@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 // Controller
 use App\Http\Controllers\API\PesananController;
+use App\Http\Controllers\API\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,11 @@ use App\Http\Controllers\API\PesananController;
 |
 */
 
+Route::group(['prefix' => 'auth'], function() {
+    Route::post('/register',[UserController::class, 'register']);
+    Route::post('/login',[UserController::class, 'login']);
+    Route::delete('/logout',[UserController::class, 'logout']);
+});
 Route::group([], function() {
     Route::resource('/order',PesananController::class);
 });
