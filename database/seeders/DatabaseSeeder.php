@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'admin super',
             'email' => 'admin@gmail.com',
-            'password' => 'password'
+            'password' => bcrypt('password')
         ]);
 
         Pesanan::factory(5)->create();
