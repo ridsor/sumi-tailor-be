@@ -21,6 +21,7 @@ use App\Http\Controllers\API\UserController;
 Route::group(['prefix' => 'auth'], function() {
     Route::post('/register',[UserController::class, 'register']);
     Route::post('/login',[UserController::class, 'login']);
+    Route::post('/refresh',[UserController::class, 'refresh']);
     Route::delete('/logout',[UserController::class, 'logout']);
 });
 Route::group([], function() {

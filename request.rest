@@ -17,4 +17,7 @@ Content-Type: application/json
 }
 
 ###
+POST http://sumi-taylor.test/api/auth/refresh
+
+###
 DELETE http://sumi-taylor.test/api/auth/logout
