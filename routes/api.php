@@ -24,6 +24,6 @@ Route::group(['prefix' => 'auth'], function() {
     Route::post('/refresh',[UserController::class, 'refresh']);
     Route::delete('/logout',[UserController::class, 'logout']);
 });
-Route::group([], function() {
+Route::group(['middleware' => ['verify.token']], function() {
     Route::resource('/order',PesananController::class);
 });
