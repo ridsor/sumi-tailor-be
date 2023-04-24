@@ -60,33 +60,18 @@ class UserController extends Controller
             ],401);
         }
 
-        $cookieMinute = 24*60*60;
-        $keyToken = env('JWT_SECRET');
-        $keyRefreshToken = env('REFRESH_JWT_SECRET');
+        $user = [
+            'id' => Auth::user()->id,
+            'name' => Auth::user()->name,
+            'email' => Auth::user()->email,
+        ];
+
+        $token = createJWT($user);
+        $refreshToken = createRefreshJWT($user);
         $tokenTime = env('JWT_TIME_TO_LIVE');
-        $requestTime = now()->timestamp;
-        $requestExpired = $requestTime + $tokenTime;
-        
-        $payloadToken = [
-            'user_id' => Auth::user()->id,
-            'name' => Auth::user()->name,
-            'email' => Auth::user()->email,
-            'iat' => $requestTime,
-            'exp' => $requestExpired
-        ];
+        $cookieMinute = env('REFRESH_TOKEN_TO_LIVE');
 
-        $payloadRefreshToken = [
-            'user_id' => Auth::user()->id,
-            'name' => Auth::user()->name,
-            'email' => Auth::user()->email,
-            'iat' => $requestTime,
-            'exp' => $requestTime + $cookieMinute,
-        ];
-
-        $token = createToken($payloadToken, $keyToken);
-        $refreshToken = createToken($payloadRefreshToken, $keyRefreshToken);
-
-        User::where('id',Auth::user()->id)->update([
+        User::where('id',$user['id'])->update([
             'access_token' => $refreshToken
         ]);
 
@@ -94,9 +79,9 @@ class UserController extends Controller
             'status' => 'success',
             'message' => 'The user has successfully logged in',
             'user' => [
-                'id' => Auth::user()->id,
-                'name' => Auth::user()->name,
-                'email' => Auth::user()->email,
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'email' => $user['email'],
             ],
             'authorization' => [
                 'access_token' => $token,
@@ -106,7 +91,35 @@ class UserController extends Controller
         ],201)->cookie('refreshToken',$refreshToken,$cookieMinute);
     }
 
-    public function logout(Request $request) {
+    public function refresh(Request $request)
+    {
+        $token = $request->cookie('refreshToken');
+        if(!$token) return Response('',204);
+
+        $user = User::where('access_token',$token)->first();
+        if(!$user) return Response('',403);
+
+        $keyRefreshToken = env('REFRESH_JWT_SECRET');
+        $tokenTime = env('JWT_TIME_TO_LIVE');
+
+        $decoded = checkJWT($token,$keyRefreshToken);
+        if(!$decoded) return Response('',403);
+
+        $newToken = createJWT($user);
+            
+        return response()->json([
+            'status' => 'success',                
+            'message' => 'The user has successfully refreshed the token',
+            'authorization' => [
+                'access_token' => $newToken,
+                'type' => 'bearer',
+                'expires_in' => $tokenTime.'s'
+            ]
+        ],201);
+    }
+
+    public function logout(Request $request) 
+    {
         $token = $request->cookie('refreshToken');
         if(!$token) return Response('',401);
         
