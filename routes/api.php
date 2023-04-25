@@ -25,5 +25,5 @@ Route::group(['prefix' => 'auth'], function() {
     Route::delete('/logout',[UserController::class, 'logout']);
 });
 Route::group(['middleware' => ['verify.token']], function() {
-    Route::resource('/order',PesananController::class);
+    Route::apiResource('/pesanan',PesananController::class);
 });
