@@ -4,6 +4,10 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use App\Models\Pesanan;
+use App\Models\User;
 
 class PesananController extends Controller
 {
@@ -14,9 +18,7 @@ class PesananController extends Controller
      */
     public function index()
     {
-        response()->json([
-            'pesanan'
-        ]);
+
     }
 
     /**
@@ -60,7 +62,14 @@ class PesananController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-    {
-        //
+    {   
+        if(!Gate::forUser(getContentJWT())->allows('is-admin-super')) return Response('',403);
+
+        Pesanan::destroy($id);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'The user has successfully deleted the order'
+        ]);
     }
 }
