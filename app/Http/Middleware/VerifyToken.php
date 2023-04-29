@@ -20,11 +20,11 @@ class VerifyToken
         $token = getJWT();
         if(!$token) return Response('',401);
         $key = env('JWT_SECRET');
-        $decoded = checkJWT($token,$key);
+        $decoded = decodeJWT($token,$key);
         if(!$decoded) return Response('',403);
         $user = User::where('id',$decoded->user_id)->first();
         if(!$user) return Response('',403);
-
+        
         return $next($request);
     }
 }

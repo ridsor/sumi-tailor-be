@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use App\Models\User;
 use App\Models\AccessTokens;
 
@@ -13,6 +14,8 @@ class UserController extends Controller
 {
     public function register(Request $request)
     {
+        if(!Gate::forUser(getContentJWT())->allows('is-admin-super')) return Response('',403);
+
         $validator = Validator::make($request->all(),[
             'name' => 'required|alpha:ascii|unique:users',
             'email' => 'required|email|unique:users',
@@ -60,18 +63,15 @@ class UserController extends Controller
             ],401);
         }
 
-        $user = [
-            'id' => Auth::user()->id,
-            'name' => Auth::user()->name,
-            'email' => Auth::user()->email,
-        ];
+        $user = User::where('id',Auth::user()->id)->first();
+        if(!$user) return Response('',500);
 
         $token = createJWT($user);
         $refreshToken = createRefreshJWT($user);
         $tokenTime = env('JWT_TIME_TO_LIVE');
         $cookieMinute = env('REFRESH_TOKEN_TO_LIVE');
 
-        User::where('id',$user['id'])->update([
+        User::where('id',$user->id)->update([
             'access_token' => $refreshToken
         ]);
 
@@ -79,9 +79,9 @@ class UserController extends Controller
             'status' => 'success',
             'message' => 'The user has successfully logged in',
             'user' => [
-                'id' => $user['id'],
-                'name' => $user['name'],
-                'email' => $user['email'],
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
             ],
             'authorization' => [
                 'access_token' => $token,
@@ -102,7 +102,7 @@ class UserController extends Controller
         $keyRefreshToken = env('REFRESH_JWT_SECRET');
         $tokenTime = env('JWT_TIME_TO_LIVE');
 
-        $decoded = checkJWT($token,$keyRefreshToken);
+        $decoded = decodeJWT($token,$keyRefreshToken);
         if(!$decoded) return Response('',403);
 
         $newToken = createJWT($user);
