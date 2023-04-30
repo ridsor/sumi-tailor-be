@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
@@ -17,9 +18,17 @@ class UserController extends Controller
         if(!Gate::forUser(getContentJWT())->allows('is-admin-super')) return Response('',403);
 
         $validator = Validator::make($request->all(),[
-            'name' => 'required|alpha:ascii|unique:users',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8|max:20'
+            'name' => 'required|alpha:ascii|unique:users|max:100',
+            'email' => 'required|email|unique:users|max:100',
+            'password' => [
+                'required',
+                'max:20',
+                Password::min(8)
+                ->mixedCase()
+                ->numbers()
+                ->symbols()
+                ->uncompromised(),
+            ],
         ]);   
 
         if($validator->fails()) {
@@ -29,8 +38,9 @@ class UserController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        
+        $validated = $validator->safe()->only(['name', 'email','password']);
 
-        $validated = $validator->validated();
         $validated['password'] = bcrypt($validated['password']);
 
         User::factory()->create($validated);
@@ -44,8 +54,8 @@ class UserController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'email' => 'required|email',
-            'password' => 'required',
+            'email' => 'required|email|max:100',
+            'password' => 'required|max:20|min:8',
         ]);   
 
         if($validator->fails()) {
@@ -56,7 +66,9 @@ class UserController extends Controller
             ],400);
         }
 
-        if(!Auth::attempt($validator->validated())) {
+        $validated = $validator->safe()->only(['email','password']);
+
+        if(!Auth::attempt($validated)) {
             return response()->json([
                 'status' => 'fail',
                 'message' => 'Authentication failed'

@@ -6,8 +6,9 @@ use Firebase\JWT\Key;
 if(!function_exists('getJWT')) {
   function getJWT() {
     $header = request()->header('Authorization');
-    $token = ($header) ? explode(' ',$header)[1] : "";
-    if(!$token) return null;
+    $header = ($header) ? explode(' ',$header) : null;
+    if(!$header) return null;
+    $token = (count($header) > 1) ? $header[1] : null;
     return $token;
   }
 }
