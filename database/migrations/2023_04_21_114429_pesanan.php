@@ -18,7 +18,7 @@ class Pesanan extends Migration
             $table->string('kode_barang',10)->default('');
             $table->string('nama',100);
             $table->text('deskripsi')->nullable();
-            $table->integer('harga');
+            $table->integer('harga')->nullable();
             $table->boolean('finished')->default(false);
             $table->timestamps();
         });

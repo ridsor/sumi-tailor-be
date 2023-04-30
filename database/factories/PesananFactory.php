@@ -19,6 +19,7 @@ class PesananFactory extends Factory
             'nama' => $this->faker->name(),
             'deskripsi' => $this->faker->paragraph(),
             'harga' => $this->faker->numerify('##000'),
+            'finished' => $this->faker->randomElement([0,1]),
         ];
     }
 }
