@@ -84,7 +84,29 @@ class PesananController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $rules = [
+            'nama' => 'required|string|max:100',
+            'deskripsi' => 'max:500|nullable',
+            'harga' => 'max:100|nullable',
+        ];
+
+        $validator = Validator::make($request->all(),$rules);
+
+        if($validator->fails()) return response()->json([
+            'status' => 'fail',
+            'message' => 'Valdidation failed',
+            'errors' => $validator->errors(),
+        ],400);
+
+        // Retrieve a portion of the validated input...
+        $validated = $validator->safe()->only(['nama', 'deskripsi', 'harga']);
+
+        Pesanan::where('id',$id)->update($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'The user has successfully edited the order',
+        ]);
     }
 
     /**
@@ -102,6 +124,24 @@ class PesananController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'The user has successfully deleted the order'
+        ]);
+    }
+
+    public function isFinished($id) {
+        $pesanan = Pesanan::where('id',$id)->first();
+        if(!$pesanan->finished) {
+            $pesanan->update([
+                'finished' => true
+            ]);
+        } else {
+            $pesanan->update([
+                'finished' => false
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'The user has successfully edited the order',
         ]);
     }
 }
