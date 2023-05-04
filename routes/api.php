@@ -26,4 +26,5 @@ Route::group(['prefix' => 'auth'], function() {
 });
 Route::group(['middleware' => ['verify.token']], function() {
     Route::apiResource('/pesanan',PesananController::class);
+    Route::put('/pesanan/{id}/finished',[PesananController::class, 'isFinished']);
 });
