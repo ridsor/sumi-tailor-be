@@ -36,6 +36,8 @@ class PesananController extends Controller
      */
     public function store(Request $request)
     {
+        if(!Gate::allows('is-super-or-admin')) return Response('',403);
+
         $validator = Validator::make($request->all(),[
             'nama' => 'required|string|max:100',
             'deskripsi' => 'max:500|nullable',
@@ -84,6 +86,8 @@ class PesananController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if(!Gate::allows('is-super-or-admin')) return Response('',403);
+
         $rules = [
             'nama' => 'required|string|max:100',
             'deskripsi' => 'max:500|nullable',
@@ -117,7 +121,7 @@ class PesananController extends Controller
      */
     public function destroy($id)
     {   
-        if(!Gate::forUser(getContentJWT())->allows('is-admin-super')) return Response('',403);
+        if(!Gate::allows('is-admin-super')) return Response('',403);
 
         Pesanan::destroy($id);
 
@@ -128,6 +132,8 @@ class PesananController extends Controller
     }
 
     public function isFinished($id) {
+        if(!Gate::allows('is-super-or-admin')) return Response('',403);
+
         $pesanan = Pesanan::where('id',$id)->first();
         if(!$pesanan->finished) {
             $pesanan->update([

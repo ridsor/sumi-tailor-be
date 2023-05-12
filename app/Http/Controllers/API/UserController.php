@@ -15,10 +15,10 @@ class UserController extends Controller
 {
     public function register(Request $request)
     {
-        if(!Gate::forUser(getContentJWT())->allows('is-admin-super')) return Response('',403);
+        if(!Gate::allows('is-admin-super')) return Response('',403);
 
         $validator = Validator::make($request->all(),[
-            'name' => 'required|alpha:ascii|unique:users|max:100',
+            'name' => 'required|max:100',
             'email' => 'required|email|unique:users|max:100',
             'password' => [
                 'required',
@@ -29,8 +29,9 @@ class UserController extends Controller
                 ->symbols()
                 ->uncompromised(),
             ],
+            'role_id' => 'nullable|numeric|max:3'
         ]);   
-
+        
         if($validator->fails()) {
             return response()->json([
                 'status' => 'fail',
@@ -39,8 +40,9 @@ class UserController extends Controller
             ],400);
         }
         
-        $validated = $validator->safe()->only(['name', 'email','password']);
-
+        $validated = $validator->safe()->only(['name', 'email','password','role_id']);
+        
+        if(empty($validated['role_id'])) unset($validated['role_id']);
         $validated['password'] = bcrypt($validated['password']);
 
         User::factory()->create($validated);
