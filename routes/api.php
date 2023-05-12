@@ -22,7 +22,7 @@ Route::group(['prefix' => 'auth'], function() {
     Route::post('/register',[UserController::class, 'register'])->middleware('verify.token');
     Route::post('/login',[UserController::class, 'login']);
     Route::post('/refresh',[UserController::class, 'refresh']);
-    Route::delete('/logout',[UserController::class, 'logout']);
+    Route::delete('/logout',[UserController::class, 'logout'])->middleware('verify.token');
 });
 Route::group(['middleware' => ['verify.token']], function() {
     Route::apiResource('/pesanan',PesananController::class);
