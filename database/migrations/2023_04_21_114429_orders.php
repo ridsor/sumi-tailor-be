@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Pesanan extends Migration
+class Orders extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class Pesanan extends Migration
      */
     public function up()
     {
-        Schema::create('pesanan', function(Blueprint $table) {
+        Schema::create('orders', function(Blueprint $table) {
             $table->id();
-            $table->string('kode_barang',10)->default('');
-            $table->string('nama',100);
-            $table->text('deskripsi')->nullable();
-            $table->integer('harga')->nullable();
+            $table->string('item_code',10)->default('');
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->integer('price')->nullable();
             $table->boolean('finished')->default(false);
             $table->timestamps();
         });

@@ -9,7 +9,6 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
-use App\Models\AccessTokens;
 
 class UserController extends Controller
 {
