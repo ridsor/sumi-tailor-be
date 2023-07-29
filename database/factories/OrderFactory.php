@@ -3,10 +3,10 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Pesanan;
+use App\Models\Order;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
 
-class PesananFactory extends Factory
+class OrderFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -16,9 +16,9 @@ class PesananFactory extends Factory
     public function definition()
     {
         return [
-            'nama' => $this->faker->name(),
-            'deskripsi' => $this->faker->paragraph(),
-            'harga' => $this->faker->numerify('##000'),
+            'name' => $this->faker->name(),
+            'description' => $this->faker->paragraph(),
+            'price' => $this->faker->numerify('##000'),
             'finished' => $this->faker->randomElement([0,1]),
         ];
     }

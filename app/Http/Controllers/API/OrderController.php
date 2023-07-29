@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Pesanan;
+use App\Models\Order;
 use App\Models\User;
 
-class PesananController extends Controller
+class OrderController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,12 +19,12 @@ class PesananController extends Controller
      */
     public function index()
     {
-        $pesanan = Pesanan::orderByDesc('id')->get();
+        $order = Order::orderByDesc('id')->get();
 
         return response()->json([
             'status' => 'success',
             'message'=> 'The user has successfully retrieved the order data',
-            'pesanan' => $pesanan,
+            'data' => $order,
         ]);
     }
 
@@ -39,9 +39,9 @@ class PesananController extends Controller
         if(!Gate::allows('is-super-or-admin')) return Response('',403);
 
         $validator = Validator::make($request->all(),[
-            'nama' => 'required|string|max:100',
-            'deskripsi' => 'max:500|nullable',
-            'harga' => 'max:100|nullable',
+            'name' => 'required|string|max:100',
+            'description' => 'max:500|nullable',
+            'price' => 'max:100|nullable',
         ]);
 
         if($validator->fails()) return response()->json([
@@ -51,14 +51,14 @@ class PesananController extends Controller
         ],400);
 
         // Retrieve a portion of the validated input...
-        $validated = $validator->safe()->only(['nama', 'deskripsi', 'harga']);
+        $validated = $validator->safe()->only(['name', 'description', 'price']);
 
-        $pesanan = Pesanan::create($validated);
+        $order = Order::create($validated);
 
         return response()->json([
             'status' => 'success',
             'message' => 'The user has successfully placed an order',
-            'pesanan' => $pesanan
+            'data' => $order
         ],201);
     }
 
@@ -68,12 +68,12 @@ class PesananController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Pesanan $pesanan)
+    public function show(Order $order)
     {
         return response()->json([
             'status' => 'success',
             'message'=> 'The user has successfully retrieved order data based on id',
-            'pesanan' => $pesanan,
+            'data' => $order,
         ]);
     }
 
@@ -89,9 +89,9 @@ class PesananController extends Controller
         if(!Gate::allows('is-super-or-admin')) return Response('',403);
 
         $rules = [
-            'nama' => 'required|string|max:100',
-            'deskripsi' => 'max:500|nullable',
-            'harga' => 'max:100|nullable',
+            'name' => 'required|string|max:100',
+            'description' => 'max:500|nullable',
+            'price' => 'max:100|nullable',
         ];
 
         $validator = Validator::make($request->all(),$rules);
@@ -103,9 +103,9 @@ class PesananController extends Controller
         ],400);
 
         // Retrieve a portion of the validated input...
-        $validated = $validator->safe()->only(['nama', 'deskripsi', 'harga']);
+        $validated = $validator->safe()->only(['name', 'description', 'price']);
 
-        Pesanan::where('id',$id)->update($validated);
+        Order::where('id',$id)->update($validated);
 
         return response()->json([
             'status' => 'success',
@@ -123,7 +123,7 @@ class PesananController extends Controller
     {   
         if(!Gate::allows('is-admin-super')) return Response('',403);
 
-        Pesanan::destroy($id);
+        Order::destroy($id);
 
         return response()->json([
             'status' => 'success',
@@ -134,13 +134,13 @@ class PesananController extends Controller
     public function isFinished($id) {
         if(!Gate::allows('is-super-or-admin')) return Response('',403);
 
-        $pesanan = Pesanan::where('id',$id)->first();
-        if(!$pesanan->finished) {
-            $pesanan->update([
+        $order = Order::where('id',$id)->first();
+        if(!$order->finished) {
+            $order->update([
                 'finished' => true
             ]);
         } else {
-            $pesanan->update([
+            $order->update([
                 'finished' => false
             ]);
         }
