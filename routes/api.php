@@ -4,7 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Controller
-use App\Http\Controllers\API\PesananController;
+use App\Http\Controllers\API\OrderController;
+use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\UserController;
 
 /*
@@ -25,6 +26,7 @@ Route::group(['prefix' => 'auth'], function() {
     Route::delete('/logout',[UserController::class, 'logout'])->middleware('verify.token');
 });
 Route::group(['middleware' => ['verify.token']], function() {
-    Route::apiResource('/pesanan',PesananController::class);
-    Route::put('/pesanan/{id}/finished',[PesananController::class, 'isFinished']);
+    Route::apiResource('/orders',OrderController::class);
+    Route::put('/orders/{order}/finished',[OrderController::class, 'isFinished']);
+    Route::apiResource('/messages',MessageController::class)->except('update');
 });

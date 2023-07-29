@@ -5,8 +5,9 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 
 use App\Models\User;
-use App\Models\Pesanan;
+use App\Models\Order;
 use App\Models\Role;
+use App\Models\Message;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,7 +25,8 @@ class DatabaseSeeder extends Seeder
             'role_id' => 3
         ]);
 
-        Pesanan::factory(5)->create();
+        Order::factory(5)->create();
+        Message::factory(5)->create();
 
         Role::create([
             'name' => 'user',
