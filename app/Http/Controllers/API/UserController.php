@@ -34,7 +34,7 @@ class UserController extends Controller
         if($validator->fails()) {
             return response()->json([
                 'status' => 'fail',
-                'message' => 'Valdidation failed',
+                'message' => 'Validation failed',
                 'errors' => $validator->errors(),
             ],400);
         }
@@ -48,7 +48,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'The user has successfully registered'
+            'message' => 'Register successfully'
         ],201);
     }
 
@@ -62,7 +62,7 @@ class UserController extends Controller
         if($validator->fails()) {
             return response()->json([
                 'status' => 'fail',
-                'message' => 'Valdidation failed',
+                'message' => 'Validation failed',
                 'errors' => $validator->errors(),
             ],400);
         }
@@ -90,7 +90,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'The user has successfully logged in',
+            'message' => 'Logged in successfully',
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -122,7 +122,7 @@ class UserController extends Controller
             
         return response()->json([
             'status' => 'success',                
-            'message' => 'The user has successfully refreshed the token',
+            'message' => 'Managed to refresh the token',
             'authorization' => [
                 'access_token' => $newToken,
                 'type' => 'bearer',
@@ -147,7 +147,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'The user has successfully logged out'
+            'message' => 'Logged out successfully'
         ])->withoutCookie('refreshToken');
     }
 }
