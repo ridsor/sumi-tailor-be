@@ -16,7 +16,7 @@ class Orders extends Migration
         Schema::create('orders', function(Blueprint $table) {
             $table->id();
             $table->string('item_code',10)->default('');
-            $table->string('name');
+            $table->string('name',100);
             $table->text('description')->nullable();
             $table->integer('price')->nullable();
             $table->boolean('finished')->default(false);
