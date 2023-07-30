@@ -23,7 +23,7 @@ class OrderController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message'=> 'The user has successfully retrieved the order data',
+            'message'=> 'Successfully fetched order data',
             'data' => $order,
         ]);
     }
@@ -41,12 +41,12 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(),[
             'name' => 'required|string|max:100',
             'description' => 'max:500|nullable',
-            'price' => 'max:100|nullable',
+            'price' => 'max:11|nullable',
         ]);
 
         if($validator->fails()) return response()->json([
             'status' => 'fail',
-            'message' => 'Valdidation failed',
+            'message' => 'Validation failed',
             'errors' => $validator->errors(),
         ],400);
 
@@ -55,24 +55,38 @@ class OrderController extends Controller
 
         $order = Order::create($validated);
 
-        return response()->json([
+        if(!$order) {
+            return Response([
+                'status' => 'fail',
+                'message' => 'Failed to add order',
+            ],500);
+        }
+        
+        return Response([
             'status' => 'success',
-            'message' => 'The user has successfully placed an order',
+            'message' => 'Successfully added order',
             'data' => $order
         ],201);
     }
-
+    
     /**
      * Display the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Order $order)
+    public function show($id)
     {
-        return response()->json([
+        $order = Order::where('id',$id)->first();
+
+        if(!$order) return Response([
+            'status' => 'fail',
+            'message' => 'Order data not found'
+        ],404);
+
+        return Response([
             'status' => 'success',
-            'message'=> 'The user has successfully retrieved order data based on id',
+            'message'=> 'Successfully retrieve order data based on id',
             'data' => $order,
         ]);
     }
@@ -87,6 +101,13 @@ class OrderController extends Controller
     public function update(Request $request, $id)
     {
         if(!Gate::allows('is-super-or-admin')) return Response('',403);
+
+        $order = Order::where('id',$id)->first();
+        
+        if(!$order) return Response([
+            'status' => 'success',
+            'message' => 'Order data not found'
+        ],404);
 
         $rules = [
             'name' => 'required|string|max:100',
@@ -109,7 +130,7 @@ class OrderController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'The user has successfully edited the order',
+            'message' => 'Successfully edited the order',
         ]);
     }
 
@@ -123,11 +144,18 @@ class OrderController extends Controller
     {   
         if(!Gate::allows('is-admin-super')) return Response('',403);
 
+        $order = Order::where('id',$id)->first();
+
+        if(!$order) return Response([
+            'status' => 'fail',
+            'message' => 'Order data not found',
+        ],404);
+
         Order::destroy($id);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'The user has successfully deleted the order'
+            'message' => 'Managed to delete the order'
         ]);
     }
 

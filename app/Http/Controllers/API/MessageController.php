@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Message;
 
 class MessageController extends Controller
@@ -19,19 +21,9 @@ class MessageController extends Controller
         
         return Response([
             'status' => 'success',
-            'message' => 'The user has successfully retrieved the message data',
+            'message' => 'Successfully fetched message data',
             'data' => $message
         ],200);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -42,7 +34,32 @@ class MessageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'full_name' => 'required|string|max:100',
+            'email' => 'required|email|unique:messages|max:100',
+            'message' => 'required|max:500',
+        ]);
+
+        if($validator->fails()) return Response([
+            'status' => 'fail',
+            'message' => 'Validation failed',
+            'errors' => $validator->errors(),
+        ],400);
+
+        $validated = $validator->safe()->only(['full_name','email','message']);
+
+        $message = Message::create($validated);
+
+        if(!$message) return Response([
+            'status' => 'fail',
+            'message' => 'Failed to add message',
+        ],500);
+
+        return Response([
+            'status' => 'success',
+            'message' => 'Successfully added message',
+            'data' => $message,
+        ],201);
     }
 
     /**
@@ -53,18 +70,18 @@ class MessageController extends Controller
      */
     public function show($id)
     {
-        //
-    }
+        $message = Message::where('id',$id)->first();
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        if(!$message) return Response([
+            'status' => 'fail',
+            'message' => 'Message data not found'
+        ],404);   
+
+        return Response([
+            'status' => 'success',
+            'message' => 'Successfully retrieve message data based on id',
+            'data' => $message
+        ]);
     }
 
     /**
@@ -76,9 +93,39 @@ class MessageController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-    }
+        if(!Gate::allows('is-admin-super')) return Response('',403);
 
+        $message = Message::where('id',$id)->first();
+
+        if(!$message) return Response([
+            'status' => 'fail',
+            'message' => 'Message data not found'
+        ],404);
+
+        $rules = [
+            'full_name' => 'required|string|max:100',
+            'email' => 'required|email|unique:messages|max:100',
+            'message' => 'required|max:500'
+        ];
+
+        $validator = Validator::make($request->all(),$rules);
+
+        if($validator->fails()) return Response([
+            'status' => 'fail',
+            'message' => 'Validation failed',
+            'errors' => $validator->errors(),
+        ],400);
+
+        $validated = $validator->safe()->only(['full_name','email','message']);
+
+        Message::where('id',$id)->update($validated);
+
+        return Response([
+            'status' => 'success',
+            'message' => 'Successfully edited the message'
+        ]);
+    }
+    
     /**
      * Remove the specified resource from storage.
      *
@@ -87,6 +134,20 @@ class MessageController extends Controller
      */
     public function destroy($id)
     {
-        //
+        if(!Gate::allows('is-admin-super')) return Response('',403);
+
+        $message = Message::where('id',$id)->first();
+
+        if(!$message) return Response([
+            'status' => 'fail',
+            'message' => 'Message data not found'
+        ],404);
+
+        Message::destroy($id);
+
+        return Response([
+            'status' => 'success',
+            'message' => 'Managed to delete the message'
+        ]);
     }
 }
