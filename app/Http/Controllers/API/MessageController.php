@@ -83,48 +83,6 @@ class MessageController extends Controller
             'data' => $message
         ]);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        if(!Gate::allows('is-admin-super')) return Response('',403);
-
-        $message = Message::where('id',$id)->first();
-
-        if(!$message) return Response([
-            'status' => 'fail',
-            'message' => 'Message data not found'
-        ],404);
-
-        $rules = [
-            'full_name' => 'required|string|max:100',
-            'email' => 'required|email|unique:messages|max:100',
-            'message' => 'required|max:500'
-        ];
-
-        $validator = Validator::make($request->all(),$rules);
-
-        if($validator->fails()) return Response([
-            'status' => 'fail',
-            'message' => 'Validation failed',
-            'errors' => $validator->errors(),
-        ],400);
-
-        $validated = $validator->safe()->only(['full_name','email','message']);
-
-        Message::where('id',$id)->update($validated);
-
-        return Response([
-            'status' => 'success',
-            'message' => 'Successfully edited the message'
-        ]);
-    }
     
     /**
      * Remove the specified resource from storage.
