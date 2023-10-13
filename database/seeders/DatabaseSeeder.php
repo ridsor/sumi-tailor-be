@@ -26,7 +26,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Order::factory(5)->create();
-        Message::factory(5)->create();
 
         Role::create([
             'name' => 'user',
