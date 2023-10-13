@@ -150,4 +150,22 @@ class UserController extends Controller
             'message' => 'Logged out successfully'
         ])->withoutCookie('refreshToken');
     }
+
+    public function delete($id) {
+        if(!Gate::allows('is-admin-super')) return Response('',403);
+
+        $user = User::where('id',$id)->first();
+
+        if(!$user) return Response([
+            'status' => 'fail',
+            'message' => 'User not found'
+        ],404);
+
+        User::destroy($user);
+
+        return Response([
+            'status' => 'success',
+            'message' => 'Account has been deleted',
+        ]);
+    }
 }

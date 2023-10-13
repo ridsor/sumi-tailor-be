@@ -24,9 +24,9 @@ Route::group(['prefix' => 'auth'], function() {
     Route::post('/login',[UserController::class, 'login']);
     Route::post('/refresh',[UserController::class, 'refresh']);
     Route::delete('/logout',[UserController::class, 'logout'])->middleware('verify.token');
+    Route::delete('/delete/{id}',[UserController::class, 'delete']);
 });
 Route::group(['middleware' => ['verify.token']], function() {
     Route::apiResource('/orders',OrderController::class);
     Route::put('/orders/{order}/finished',[OrderController::class, 'isFinished']);
-    Route::apiResource('/messages',MessageController::class)->except('update');
 });

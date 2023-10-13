@@ -39,7 +39,8 @@ class OrderController extends Controller
         if(!Gate::allows('is-super-or-admin')) return Response('',403);
 
         $validator = Validator::make($request->all(),[
-            'name' => 'required|string|max:100',
+            'name' => 'required|max:100',
+            'category' => 'required|string|max:100',
             'description' => 'max:500|nullable',
             'price' => 'max:11|nullable',
         ]);
@@ -110,7 +111,8 @@ class OrderController extends Controller
         ],404);
 
         $rules = [
-            'name' => 'required|string|max:100',
+            'name' => 'required|max:100',
+            'category' => 'required|string|max:100',
             'description' => 'max:500|nullable',
             'price' => 'max:100|nullable',
         ];
