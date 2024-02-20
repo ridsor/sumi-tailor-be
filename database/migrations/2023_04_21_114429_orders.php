@@ -17,7 +17,10 @@ class Orders extends Migration
             $table->id();
             $table->string('item_code',10)->default('');
             $table->string('name',100);
-            $table->text('description')->nullable();
+            $table->string('email',100)->unique();
+            $table->string('no_hp',12)->unique();
+            $table->string('address',500);
+            $table->text('description');
             $table->integer('price')->nullable();
             $table->boolean('finished')->default(false);
             $table->timestamps();
