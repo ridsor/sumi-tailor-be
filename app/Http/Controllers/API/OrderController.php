@@ -40,9 +40,11 @@ class OrderController extends Controller
 
         $validator = Validator::make($request->all(),[
             'name' => 'required|max:100',
-            'category' => 'required|string|max:100',
-            'description' => 'max:500|nullable',
-            'price' => 'max:11|nullable',
+            'email' => 'required|email|unique:orders|max:100',
+            'no_hp' => 'required|numeric|unique:orders|max:100',
+            'address' => 'required|max:100',
+            'description' => 'required|max:500',
+            'price' => 'max:11|nullable|numeric',
         ]);
 
         if($validator->fails()) return response()->json([
@@ -52,7 +54,7 @@ class OrderController extends Controller
         ],400);
 
         // Retrieve a portion of the validated input...
-        $validated = $validator->safe()->only(['name', 'description', 'price']);
+        $validated = $validator->safe()->only(['name', 'description', 'price', 'email', 'no_hp', 'address']);
 
         $order = Order::create($validated);
 
@@ -112,16 +114,18 @@ class OrderController extends Controller
 
         $rules = [
             'name' => 'required|max:100',
-            'category' => 'required|string|max:100',
-            'description' => 'max:500|nullable',
-            'price' => 'max:100|nullable',
+            'email' => 'required|email|unique:orders|max:100',
+            'no_hp' => 'required|numeric|unique:orders|max:100',
+            'address' => 'required|max:100',
+            'description' => 'required|max:500',
+            'price' => 'max:11|nullable|numeric',
         ];
 
         $validator = Validator::make($request->all(),$rules);
 
         if($validator->fails()) return response()->json([
             'status' => 'fail',
-            'message' => 'Valdidation failed',
+            'message' => 'Validation failed',
             'errors' => $validator->errors(),
         ],400);
 
