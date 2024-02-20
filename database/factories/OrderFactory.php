@@ -17,6 +17,9 @@ class OrderFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
+            'email' => $this->faker->freeEmail(),
+            'no_hp' => $this->faker->numerify('08##########'),
+            'address' => $this->faker->word(),
             'description' => $this->faker->paragraph(),
             'price' => $this->faker->numerify('##000'),
             'finished' => $this->faker->randomElement([0,1]),
