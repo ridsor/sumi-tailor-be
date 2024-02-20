@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'admin',
         ]);
         Role::create([
-            'name' => 'admin_super',
+            'name' => 'super admin',
         ]);
     }
 }
