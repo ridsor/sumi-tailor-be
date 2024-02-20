@@ -20,6 +20,7 @@ use App\Http\Controllers\API\UserController;
 */
 
 Route::group(['prefix' => 'auth'], function() {
+    Route::get('/me',[UserController::class, 'me']);
     Route::post('/register',[UserController::class, 'register'])->middleware('verify.token');
     Route::post('/login',[UserController::class, 'login']);
     Route::post('/refresh',[UserController::class, 'refresh']);
