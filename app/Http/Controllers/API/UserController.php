@@ -12,6 +12,29 @@ use App\Models\User;
 
 class UserController extends Controller
 {
+    public function me(Request $request) {
+        $token = $request->cookie('refreshToken');
+        if(!$token) return Response('',204);
+
+        $user = User::where('access_token',$token)->first();
+        if(!$user) return Response('',403);
+        
+        $keyRefreshToken = env('REFRESH_JWT_SECRET');
+        $decoded = decodeJWT($token,$keyRefreshToken);
+        if(!$decoded) return Response('',403);
+
+        return Response([
+            'status' => 'success',
+            'message' => 'Successfully retrieved user data',
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role->name
+            ]
+        ]);
+    }
+
     public function register(Request $request)
     {
         if(!Gate::allows('is-admin-super')) return Response('',403);
