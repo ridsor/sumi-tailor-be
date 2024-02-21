@@ -29,5 +29,6 @@ Route::group(['prefix' => 'auth'], function() {
 });
 Route::group(['middleware' => ['verify.token']], function() {
     Route::apiResource('/orders',OrderController::class);
-    Route::put('/orders/{order}/finished',[OrderController::class, 'isFinished']);
+    Route::put('/orders/{order}/finished',[OrderController::class, 'status']);
+    Route::put('/orders/{order}/confirm',[OrderController::class, 'confirm']);
 });

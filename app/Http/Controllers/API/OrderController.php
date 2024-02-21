@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\MonthlyTemp;
+use Illuminate\Support\Carbon;
 
 class OrderController extends Controller
 {
@@ -165,23 +167,63 @@ class OrderController extends Controller
         ]);
     }
 
-    public function isFinished($id) {
+    public function status($id) {
         if(!Gate::allows('is-super-or-admin')) return Response('',403);
-
+        
         $order = Order::where('id',$id)->first();
-        if(!$order->finished) {
+
+        if(!$order) return Response([
+            'status' => 'fail',
+            'message' => 'Order data not found',
+        ],404);
+
+        if($order->status == 'isProcess') {
             $order->update([
-                'finished' => true
+                'status' => 'isCompleted'
             ]);
         } else {
             $order->update([
-                'finished' => false
+                'status' => 'isProcess'
             ]);
         }
-
+        
         return response()->json([
             'status' => 'success',
             'message' => 'The user has successfully edited the order',
+        ]);
+    }
+
+    public function confirm($id) {
+        if(!Gate::allows('is-super-or-admin')) return Response('',403);
+        
+        $order = Order::where('id',$id)->first();
+        
+        if(!$order) return Response([
+            'status' => 'fail',
+            'message' => 'Order data not found',
+        ],404);
+        
+        $record = MonthlyTemp::latest()->first();
+        $today = Carbon::now();
+        $latestRecord = Carbon::parse($record->updated_at);
+
+        if($today->month == $latestRecord->month && $today->year == $latestRecord->year) {
+            MonthlyTemp::where('id',$record->id)->update([
+                'order_total' => $record->order_total + 1,
+                'total_income' => $record->total_income + $order->price,
+            ]);
+        } else {
+            MonthlyTemp::create([
+                'order_total' => $record->order_total + 1,
+                'total_income' => $record->total_income + $order->price,
+            ]);
+        }
+
+        Order::destroy($id);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Order successfully confirmed'
         ]);
     }
 }
