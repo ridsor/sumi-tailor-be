@@ -22,7 +22,7 @@ class Orders extends Migration
             $table->string('address',500);
             $table->text('description');
             $table->integer('price')->nullable();
-            $table->boolean('finished')->default(false);
+            $table->string('status',10)->default('isProcess');
             $table->timestamps();
         });
     }
