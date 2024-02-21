@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Role;
-use App\Models\Message;
+use App\Models\MonthlyTemp;
 
 class DatabaseSeeder extends Seeder
 {
@@ -36,5 +36,7 @@ class DatabaseSeeder extends Seeder
         Role::create([
             'name' => 'super admin',
         ]);
+
+        MonthlyTemp::create();
     }
 }

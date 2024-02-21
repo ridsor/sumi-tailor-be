@@ -48,7 +48,7 @@ class Handler extends ExceptionHandler
         return Response([
             'status' => 'fail',
             'message' => 'Not Found'
-        ]);
+        ],404);
     }
     return Response($exception);
  
