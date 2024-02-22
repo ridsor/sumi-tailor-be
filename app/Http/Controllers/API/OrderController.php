@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\MonthlyTemp;
+use App\Models\Temp;
 use Illuminate\Support\Carbon;
+use Firebase\JWT\JWT;
 
 class OrderController extends Controller
 {
@@ -110,7 +112,7 @@ class OrderController extends Controller
         $order = Order::where('id',$id)->first();
         
         if(!$order) return Response([
-            'status' => 'success',
+            'status' => 'fail',
             'message' => 'Order data not found'
         ],404);
 
@@ -224,6 +226,40 @@ class OrderController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Order successfully confirmed'
+        ]);
+    }
+
+    public function register_order() {
+        if(!Gate::allows('is-super-or-admin')) return Response('',403);
+
+        $user = decodeJWT(getJWT(), env('JWT_SECRET'));
+        if(!$user) return Response('',403);
+
+        $key = env('REGISTER_ORDER_JWT_SECRET');
+        $tokenTime = env('REGISTER_ORDER_TOKEN_TIME_TO_LIVE');
+        $requestTime = now()->timestamp;
+        $requestExpired = $requestTime + $tokenTime;
+        $payload = [
+            'user_id' => $user->user_id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'iat' => $requestTime,
+            'exp' => $requestExpired
+        ];
+        
+        $token = JWT::encode($payload, $key, 'HS256');
+        
+        Temp::latest()->first()->update([
+            'register_order_token' => $token
+        ]);
+
+        return Response([
+            'status' => 'success',
+            'message' => 'Data retrieved successfully',
+            'data' => [
+                'token' => $token
+            ]
         ]);
     }
 }

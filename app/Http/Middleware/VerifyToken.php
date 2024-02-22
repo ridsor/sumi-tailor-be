@@ -21,9 +21,9 @@ class VerifyToken
         if(!$token) return Response('',401);
         $key = env('JWT_SECRET');
         $decoded = decodeJWT($token,$key);
-        if(!$decoded) return Response('',403);
+        if(!$decoded) return Response('',401);
         $user = User::where('id',$decoded->user_id)->first();
-        if(!$user) return Response('',403);
+        if(!$user) return Response('',401);
         
         return $next($request);
     }
