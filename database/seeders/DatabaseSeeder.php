@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Role;
 use App\Models\MonthlyTemp;
+use App\Models\Temp;
 
 class DatabaseSeeder extends Seeder
 {
@@ -38,5 +39,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         MonthlyTemp::create();
+        Temp::create();
     }
 }

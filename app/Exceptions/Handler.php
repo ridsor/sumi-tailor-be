@@ -42,15 +42,18 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
 {
 
-    
-
     if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
         return Response([
             'status' => 'fail',
             'message' => 'Not Found'
         ],404);
+    } else if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+        return Response([
+            'status' => 'fail',
+            'message' => 'Unauthenticated'
+        ],401);
     }
-    return Response($exception);
+
  
     return parent::render($request, $exception);
 }

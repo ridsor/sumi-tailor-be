@@ -16,7 +16,6 @@ class Temp extends Migration
         Schema::create('temp', function (Blueprint $table) {
             $table->id();
             $table->text('register_order_token')->unique()->nullable();
-            $table->binary('register_order_qr_code')->nullable();
             $table->timestamps();
         });
     }

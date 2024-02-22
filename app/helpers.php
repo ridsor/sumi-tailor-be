@@ -29,8 +29,8 @@ if(!function_exists('createJWT')) {
       'exp' => $requestExpired
     ];
 
-    $key = JWT::encode($payload, $key, 'HS256');
-    return $key;
+    $token = JWT::encode($payload, $key, 'HS256');
+    return $token;
   }
 }
 
