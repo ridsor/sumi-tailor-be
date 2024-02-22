@@ -31,4 +31,5 @@ Route::group(['middleware' => ['verify.token']], function() {
     Route::apiResource('/orders',OrderController::class);
     Route::put('/orders/{order}/finished',[OrderController::class, 'status']);
     Route::put('/orders/{order}/confirm',[OrderController::class, 'confirm']);
+    Route::post('/orders/register-order',[OrderController::class, 'register_order']);
 });
