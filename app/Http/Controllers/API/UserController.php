@@ -124,7 +124,9 @@ class UserController extends Controller
                 'type' => 'bearer',
                 'expires_in' => $tokenTime.'s'
             ]
-        ],201)->cookie('refreshToken',$refreshToken,$cookieMinute);
+        ],201)->withCookie(
+            cookie('refreshToken', $refreshToken, $cookieMinute, null, null, false, true)
+        );
     }
 
     public function refresh(Request $request)
