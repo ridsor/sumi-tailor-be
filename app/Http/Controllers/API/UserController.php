@@ -14,7 +14,7 @@ class UserController extends Controller
 {
     public function me(Request $request) {
         $token = $request->cookie('refreshToken');
-        if(!$token) return Response('',204);
+        if(!$token) return Response('',401);
 
         $user = User::where('access_token',$token)->first();
         if(!$user) return Response('',403);
@@ -125,14 +125,14 @@ class UserController extends Controller
                 'expires_in' => $tokenTime.'s'
             ]
         ],201)->withCookie(
-            cookie('refreshToken', $refreshToken, $cookieMinute, null, null, false, true)
+            cookie('refreshToken', $refreshToken, $cookieMinute)
         );
     }
 
     public function refresh(Request $request)
     {
         $token = $request->cookie('refreshToken');
-        if(!$token) return Response('',204);
+        if(!$token) return Response('',401);
 
         $user = User::where('access_token',$token)->first();
         if(!$user) return Response('',403);
