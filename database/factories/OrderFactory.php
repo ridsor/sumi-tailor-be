@@ -22,7 +22,7 @@ class OrderFactory extends Factory
             'address' => $this->faker->word(),
             'description' => $this->faker->paragraph(),
             'price' => $this->faker->numerify('##000'),
-            'status' => $this->faker->randomElement(['isProcess','isSuccess']),
+            'status' => $this->faker->randomElement(['isProcess','isFinished']),
         ];
     }
 }

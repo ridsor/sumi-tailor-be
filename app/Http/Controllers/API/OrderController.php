@@ -21,14 +21,22 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $order = Order::orderByDesc('id')->get();
+        $page = $request->query('page') ? $request->query('page') : 1;
+        $limit = $request->query('limit') ? $request->query('limit') : 5;
+        $status = $request->query('status') ? $request->query('status') : 'isProcess';
+    
+        $orders = Order::orderByDesc('id')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
+        $total = Order::where('status',$status)->count();
 
         return response()->json([
             'status' => 'success',
             'message'=> 'Successfully fetched order data',
-            'data' => $order,
+            'data' => $orders,
+            'page'=> $page,
+            'limit' => $limit,
+            'total' => $total,
         ]);
     }
 
