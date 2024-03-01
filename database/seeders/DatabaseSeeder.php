@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             'role_id' => 3
         ]);
 
-        Order::factory(5)->create();
+        Order::factory(50)->create();
 
         Role::create([
             'name' => 'user',
