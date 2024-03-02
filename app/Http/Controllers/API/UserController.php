@@ -107,7 +107,7 @@ class UserController extends Controller
         $token = createJWT($user);
         $refreshToken = createRefreshJWT($user);
         $tokenTime = env('JWT_TIME_TO_LIVE');
-        $cookieMinute = ($remember_me) ? env('REFRESH_TOKEN_TO_LIVE',4320) : 7200;
+        $cookieMinute = ($remember_me) ? env('REFRESH_TOKEN_TO_LIVE',259200) : 7200;
 
         User::where('id',$user->id)->update([
             'access_token' => $refreshToken
