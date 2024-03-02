@@ -48,7 +48,7 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        if(!Gate::allows('is-super-or-admin')) return Response('',403);
+        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
 
         $validator = Validator::make($request->all(),[
             'name' => 'required|max:100',
@@ -115,7 +115,7 @@ class OrderController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(!Gate::allows('is-super-or-admin')) return Response('',403);
+        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
 
         $order = Order::where('id',$id)->first();
         
@@ -160,7 +160,7 @@ class OrderController extends Controller
      */
     public function destroy($id)
     {   
-        if(!Gate::allows('is-admin-super')) return Response('',403);
+        if(!Gate::forUser(getAuthUser($request))->allows('is-admin-super')) return Response('',403);
 
         $order = Order::where('id',$id)->first();
 
@@ -178,7 +178,7 @@ class OrderController extends Controller
     }
 
     public function status($id) {
-        if(!Gate::allows('is-super-or-admin')) return Response('',403);
+        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
         
         $order = Order::where('id',$id)->first();
 
@@ -204,7 +204,7 @@ class OrderController extends Controller
     }
 
     public function confirm($id) {
-        if(!Gate::allows('is-super-or-admin')) return Response('',403);
+        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
         
         $order = Order::where('id',$id)->first();
         
@@ -238,7 +238,7 @@ class OrderController extends Controller
     }
 
     public function register_order() {
-        if(!Gate::allows('is-super-or-admin')) return Response('',403);
+        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
 
         $user = decodeJWT(getJWT(), env('JWT_SECRET'));
         if(!$user) return Response('',403);

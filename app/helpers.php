@@ -1,5 +1,6 @@
 <?php
 use Firebase\JWT\JWT;
+use App\Models\User;
 use Firebase\JWT\Key;
 
 // JWT
@@ -72,5 +73,15 @@ if(!function_exists('getContentJWT')) {
     $key = env('JWT_SECRET');
     $decoded = decodeJWT($token,$key);
     return $decoded;
+  }
+}
+
+if(!function_exists('getAuthUser')) {
+  function getAuthUser($request) {
+    $tokenUser = $request->cookie('refreshToken');
+    $keyUser = env('REFRESH_JWT_SECRET');
+    $decodedUser = decodeJWT($tokenUser, $keyUser);
+    $user = User::where('id',$decodedUser->user_id)->first();
+    return $user;
   }
 }
