@@ -37,7 +37,7 @@ class UserController extends Controller
 
     public function register(Request $request)
     {
-        if(!Gate::allows('is-admin-super')) return Response('',403);
+        if(!Gate::forUser(getAuthUser($request))->allows('is-admin-super')) return Response('',403);
 
         $validator = Validator::make($request->all(),[
             'name' => 'required|max:100',
@@ -80,8 +80,9 @@ class UserController extends Controller
         $validator = Validator::make($request->all(),[
             'email' => 'required|email|max:100',
             'password' => 'required|max:20|min:8',
+            'remember_me' => 'boolean'
         ]);   
-
+        
         if($validator->fails()) {
             return response()->json([
                 'status' => 'fail',
@@ -91,6 +92,7 @@ class UserController extends Controller
         }
 
         $validated = $validator->safe()->only(['email','password']);
+        $remember_me = $request->has('remember_me') ? $validator->safe()->only(['remember_me']) : false;
 
         if(!Auth::attempt($validated)) {
             return response()->json([
@@ -105,7 +107,7 @@ class UserController extends Controller
         $token = createJWT($user);
         $refreshToken = createRefreshJWT($user);
         $tokenTime = env('JWT_TIME_TO_LIVE');
-        $cookieMinute = env('REFRESH_TOKEN_TO_LIVE');
+        $cookieMinute = ($remember_me) ? env('REFRESH_TOKEN_TO_LIVE',4320) : 7200;
 
         User::where('id',$user->id)->update([
             'access_token' => $refreshToken
@@ -177,7 +179,7 @@ class UserController extends Controller
     }
 
     public function delete($id) {
-        if(!Gate::allows('is-admin-super')) return Response('',403);
+        if(!Gate::forUser(getAuthUser($request))->allows('is-admin-super')) return Response('',403);
 
         $user = User::where('id',$id)->first();
 
