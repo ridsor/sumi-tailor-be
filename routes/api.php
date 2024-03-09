@@ -28,8 +28,9 @@ Route::group(['prefix' => 'auth'], function() {
     Route::delete('/delete/{id}',[UserController::class, 'delete']);
 });
 Route::group(['middleware' => ['verify.token']], function() {
-    Route::apiResource('/orders',OrderController::class);
-    Route::put('/orders/{order}/finished',[OrderController::class, 'status']);
+    Route::apiResource('/orders',OrderController::class)->except('show');
+    Route::put('/orders/{order}/status',[OrderController::class, 'status']);
     Route::put('/orders/{order}/confirm',[OrderController::class, 'confirm']);
     Route::post('/orders/register-order',[OrderController::class, 'register_order']);
 });
+Route::get('/orders/{item_code}',[OrderController::class, 'show']);

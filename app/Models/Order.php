@@ -10,15 +10,7 @@ class Order extends Model
     use HasFactory;
     
     protected $table = 'orders';
-    protected $guarded = ['id'];
-
-    public static function boot()
-    {
-        parent::boot();
-
-        static::created(function($order) {
-            $order->item_code = 'ST' . sprintf('%03d',$order->id);
-            $order->save();
-        });
-    }
+    protected $primeryKey = 'item_code';
+    public $incrementing = false;
+    protected $guarded = [];
 }
