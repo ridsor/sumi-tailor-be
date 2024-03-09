@@ -35,6 +35,25 @@ if(!function_exists('createJWT')) {
   }
 }
 
+if(!function_exists('createOrderJWT')) {
+  function createOrderJWT($order) {
+    $key = env('ORDER_JWT_SECRET');
+    $tokenTime = env('ORDER_TOKEN_TIME_TO_LIVE');
+    $requestTime = now()->timestamp;
+    $requestExpired = $requestTime + $tokenTime;
+
+    $payload = [
+      'item_code' => $order->item_code,
+      'iat' => $requestTime,
+      'exp' => $requestExpired
+    ];
+
+    $token = JWT::encode($payload, $key, 'HS256');
+
+    return $token;
+  }
+}
+
 if(!function_exists('createRefreshJWT')) {
   function createRefreshJWT($user) {
     $key = env('REFRESH_JWT_SECRET');
@@ -51,8 +70,8 @@ if(!function_exists('createRefreshJWT')) {
       'exp' => $requestExpired
     ];
 
-    $key = JWT::encode($payload, $key, 'HS256');
-    return $key;
+    $token = JWT::encode($payload, $key, 'HS256');
+    return $token;
   }
 }
 
