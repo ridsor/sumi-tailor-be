@@ -97,9 +97,10 @@ if(!function_exists('getContentJWT')) {
 
 if(!function_exists('getAuthUser')) {
   function getAuthUser($request) {
-    $tokenUser = $request->cookie('refreshToken');
+    $tokenUser = $request->cookie('refreshToken') || '';
     $keyUser = env('REFRESH_JWT_SECRET');
     $decodedUser = decodeJWT($tokenUser, $keyUser);
+    if(!$decodedUser) return null;
     $user = User::where('id',$decodedUser->user_id)->first();
     return $user;
   }

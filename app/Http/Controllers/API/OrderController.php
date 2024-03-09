@@ -103,11 +103,13 @@ class OrderController extends Controller
     public function show(Request $request, $item_code)
     {
         if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) {
-            $token = $request->query('token') || '';
+            $token = $request->query('token');
+            if(!$token) return Response('',403);
             $decoded = decodeJWT($token, env('ORDER_JWT_SECRET'));
-            if(!$decoded) Response('',403);
+            if(!$decoded) return Response('',403);
+            if($decoded->item_code !== $item_code) return Response('',403);
         }
-
+        
         $order = Order::where('item_code',$item_code)->first();
 
         if(!$order) return Response([
