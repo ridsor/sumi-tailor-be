@@ -27,7 +27,7 @@ class OrderController extends Controller
         $limit = $request->query('limit') ? $request->query('limit') : 5;
         $status = $request->query('status') ? $request->query('status') : 'isProcess';
     
-        $orders = Order::orderByDesc('id')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
+        $orders = Order::orderByDesc('updated_at')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
         $total = Order::where('status',$status)->count();
 
         return response()->json([
@@ -48,16 +48,19 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
+        $messages = [
+            'email.unique' => 'Email sudah ada',
+            'no_hp.unique' => 'No Handphone sudah ada',
+        ];
 
         $validator = Validator::make($request->all(),[
             'name' => 'required|max:100',
             'email' => 'required|email|unique:orders|max:100',
-            'no_hp' => 'required|numeric|unique:orders|max:100',
+            'no_hp' => 'required|numeric|unique:orders',
             'address' => 'required|max:100',
             'description' => 'required|max:500',
-            'price' => 'max:11|nullable|numeric',
-        ]);
+            'price' => 'nullable|numeric',
+        ], $messages);
 
         if($validator->fails()) return response()->json([
             'status' => 'fail',
@@ -67,20 +70,27 @@ class OrderController extends Controller
 
         // Retrieve a portion of the validated input...
         $validated = $validator->safe()->only(['name', 'description', 'price', 'email', 'no_hp', 'address']);
-
+        
+        $today = Carbon::now();
+        $item_code = 'ST' . random_int(100,999) . $today->day . $today->month;
+        $validated['item_code'] = $item_code;
+        
         $order = Order::create($validated);
 
         if(!$order) {
-            return Response([
-                'status' => 'fail',
-                'message' => 'Failed to add order',
+                return Response([
+                    'status' => 'fail',
+                    'message' => 'Failed to add order',
             ],500);
         }
+        
+        $access_token = createOrderJWT($order);
         
         return Response([
             'status' => 'success',
             'message' => 'Successfully added order',
-            'data' => $order
+            'access_token' => $access_token,
+            'data' => $order,
         ],201);
     }
     
@@ -90,9 +100,15 @@ class OrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $item_code)
     {
-        $order = Order::where('id',$id)->first();
+        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) {
+            $token = $request->query('token') || '';
+            $decoded = decodeJWT($token, env('ORDER_JWT_SECRET'));
+            if(!$decoded) Response('',403);
+        }
+
+        $order = Order::where('item_code',$item_code)->first();
 
         if(!$order) return Response([
             'status' => 'fail',
@@ -117,7 +133,7 @@ class OrderController extends Controller
     {
         if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
 
-        $order = Order::where('id',$id)->first();
+        $order = Order::where('item_code',$id)->first();
         
         if(!$order) return Response([
             'status' => 'fail',
@@ -126,14 +142,24 @@ class OrderController extends Controller
 
         $rules = [
             'name' => 'required|max:100',
-            'email' => 'required|email|unique:orders|max:100',
-            'no_hp' => 'required|numeric|unique:orders|max:100',
             'address' => 'required|max:100',
             'description' => 'required|max:500',
-            'price' => 'max:11|nullable|numeric',
+            'price' => 'nullable|numeric',
         ];
 
-        $validator = Validator::make($request->all(),$rules);
+        $messages = [
+            'email.unique' => 'Email sudah ada',
+            'no_hp.unique' => 'No Handphone sudah ada',
+        ];
+
+        if($order->email != $request->input('email')) {
+            $rules['email'] = 'required|email|unique:orders|max:100';
+        }
+        if($order->no_hp != $request->input('no_hp')) {
+            $rules['no_hp'] = 'required|numeric|unique:orders';
+        }
+
+        $validator = Validator::make($request->all(),$rules, $messages);
 
         if($validator->fails()) return response()->json([
             'status' => 'fail',
@@ -142,9 +168,9 @@ class OrderController extends Controller
         ],400);
 
         // Retrieve a portion of the validated input...
-        $validated = $validator->safe()->only(['name', 'description', 'price']);
+        $validated = $validator->safe()->only(['name', 'description', 'price', 'email', 'no_hp', 'address']);
 
-        Order::where('id',$id)->update($validated);
+        Order::where('item_code',$id)->update($validated);
 
         return response()->json([
             'status' => 'success',
@@ -158,11 +184,11 @@ class OrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request,$id)
     {   
         if(!Gate::forUser(getAuthUser($request))->allows('is-admin-super')) return Response('',403);
 
-        $order = Order::where('id',$id)->first();
+        $order = Order::where('item_code',$id)->first();
 
         if(!$order) return Response([
             'status' => 'fail',
@@ -177,22 +203,22 @@ class OrderController extends Controller
         ]);
     }
 
-    public function status($id) {
+    public function status(Request $request, $id) {
         if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
         
-        $order = Order::where('id',$id)->first();
-
+        $order = Order::where('item_code',$id)->first();
+        
         if(!$order) return Response([
             'status' => 'fail',
             'message' => 'Order data not found',
         ],404);
-
+        
         if($order->status == 'isProcess') {
-            $order->update([
-                'status' => 'isCompleted'
+            Order::where('item_code',$id)->update([
+                'status' => 'isFinished'
             ]);
         } else {
-            $order->update([
+            Order::where('item_code',$id)->update([
                 'status' => 'isProcess'
             ]);
         }
@@ -206,7 +232,7 @@ class OrderController extends Controller
     public function confirm($id) {
         if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
         
-        $order = Order::where('id',$id)->first();
+        $order = Order::where('item_code',$id)->first();
         
         if(!$order) return Response([
             'status' => 'fail',

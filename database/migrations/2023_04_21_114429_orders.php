@@ -14,8 +14,7 @@ class Orders extends Migration
     public function up()
     {
         Schema::create('orders', function(Blueprint $table) {
-            $table->id();
-            $table->string('item_code',10)->default('');
+            $table->string('item_code',10)->primary();
             $table->string('name',100);
             $table->string('email',100)->unique();
             $table->string('no_hp',12)->unique();

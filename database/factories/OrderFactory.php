@@ -16,7 +16,8 @@ class OrderFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->name(),
+            'item_code' => 'ST'. $this->faker->numerify('#######'),
+            'name' => $this->faker->name(), 
             'email' => $this->faker->freeEmail(),
             'no_hp' => $this->faker->numerify('08##########'),
             'address' => $this->faker->word(),
