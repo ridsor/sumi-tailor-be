@@ -48,6 +48,15 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) {
+            $token = $request->query('token');
+            if(!$token) return Response('',403);
+            $decoded = decodeJWT($token, env('REGISTER_ORDER_JWT_SECRET'));
+            if(!$decoded) return Response('',403);
+            $user = User::where('id',$decoded->user_id)->first();
+            if(!$user) return Response('',403);
+        }
+
         $messages = [
             'email.unique' => 'Email sudah ada',
             'no_hp.unique' => 'No Handphone sudah ada',
