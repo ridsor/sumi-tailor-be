@@ -264,12 +264,12 @@ class OrderController extends Controller
         ]);
     }
 
-    public function register_order() {
+    public function register_order(Request $request) {
         if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
-
+        
         $user = decodeJWT(getJWT(), env('JWT_SECRET'));
         if(!$user) return Response('',403);
-
+        
         $key = env('REGISTER_ORDER_JWT_SECRET');
         $tokenTime = env('REGISTER_ORDER_TOKEN_TIME_TO_LIVE');
         $requestTime = now()->timestamp;
@@ -295,6 +295,26 @@ class OrderController extends Controller
             'data' => [
                 'token' => $token
             ]
+        ]);
+    }
+
+    public function get_register_order(Request $request) {
+        $token = $request->query('token');
+
+        if(!$token) return Response('',403);
+
+        $key = env('REGISTER_ORDER_JWT_SECRET');
+        $decoded = decodeJWT($token,$key);
+        if(!$decoded) return Response('',403);
+        $user = User::where('id',$decoded->user_id)->first();
+        if(!$user) return Response('',403);
+
+        $result = Temp::where('register_order_token',$token)->first();
+        if(!$result) return Response('',403);
+
+        return Response([
+            'status' => 'success',
+            'message' => 'Token checked successfully',
         ]);
     }
 }

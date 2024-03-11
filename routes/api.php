@@ -34,4 +34,5 @@ Route::group(['middleware' => ['verify.token']], function() {
     Route::post('/orders/register-order',[OrderController::class, 'register_order']);
 });
 Route::post('/orders',[OrderController::class, 'store']);
+Route::get('/orders/register-order',[OrderController::class, 'get_register_order']);
 Route::get('/orders/{item_code}',[OrderController::class, 'show']);
