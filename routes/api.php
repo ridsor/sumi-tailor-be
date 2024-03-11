@@ -18,7 +18,6 @@ use App\Http\Controllers\API\UserController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 Route::group(['prefix' => 'auth'], function() {
     Route::get('/me',[UserController::class, 'me']);
     Route::post('/register',[UserController::class, 'register'])->middleware('verify.token');
@@ -27,12 +26,14 @@ Route::group(['prefix' => 'auth'], function() {
     Route::put('/logout',[UserController::class, 'logout'])->middleware('verify.token');
     Route::delete('/delete/{id}',[UserController::class, 'delete']);
 });
+
 Route::group(['middleware' => ['verify.token']], function() {
     Route::apiResource('/orders',OrderController::class)->except(['show','store']);
     Route::put('/orders/{order}/status',[OrderController::class, 'status']);
     Route::put('/orders/{order}/confirm',[OrderController::class, 'confirm']);
     Route::post('/orders/register-order',[OrderController::class, 'register_order']);
 });
-Route::post('/orders',[OrderController::class, 'store']);
+
 Route::get('/orders/register-order',[OrderController::class, 'get_register_order']);
+Route::post('/orders',[OrderController::class, 'store']);
 Route::get('/orders/{item_code}',[OrderController::class, 'show']);
