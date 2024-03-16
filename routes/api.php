@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 // Controller
 use App\Http\Controllers\API\OrderController;
-use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +32,8 @@ Route::group(['middleware' => ['verify.token']], function() {
     Route::put('/orders/{order}/status',[OrderController::class, 'status']);
     Route::put('/orders/{order}/confirm',[OrderController::class, 'confirm']);
     Route::post('/orders/register-order',[OrderController::class, 'register_order']);
+    
+    Route::get('/dashboard',[DashboardController::class, 'index']);
 });
 
 Route::get('/orders/register-order',[OrderController::class, 'get_register_order']);
