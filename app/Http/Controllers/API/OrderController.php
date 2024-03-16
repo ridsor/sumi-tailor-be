@@ -239,7 +239,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function confirm($id) {
+    public function confirm(Request $request, $id) {
         if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
         
         $order = Order::where('item_code',$id)->first();
@@ -252,7 +252,7 @@ class OrderController extends Controller
         $record = MonthlyTemp::latest()->first();
         $today = Carbon::now();
         $latestRecord = Carbon::parse($record->updated_at);
-
+        
         if($today->month == $latestRecord->month && $today->year == $latestRecord->year) {
             MonthlyTemp::where('id',$record->id)->update([
                 'order_total' => $record->order_total + 1,
@@ -264,8 +264,8 @@ class OrderController extends Controller
                 'total_income' => $record->total_income + $order->price,
             ]);
         }
-
-        Order::destroy($id);
+        
+        Order::where('item_code',$id)->delete();
 
         return response()->json([
             'status' => 'success',
