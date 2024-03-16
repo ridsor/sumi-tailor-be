@@ -38,7 +38,13 @@ class DatabaseSeeder extends Seeder
             'name' => 'super admin',
         ]);
 
-        MonthlyTemp::create();
+        MonthlyTemp::create([
+            'order_total' => 2,
+            'total_income' => 20000,
+            "created_at" =>  \Carbon\Carbon::now()->subMonth(),
+            "updated_at" => \Carbon\Carbon::now()->subMonth()
+        ]);
+        MonthlyTemp::create([]);
         Temp::create();
     }
 }
