@@ -20,7 +20,9 @@ class UserController extends Controller
     {
         if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
 
-        $users = User::select('id','name','email','status')->orderByDesc('updated_at')->get();
+        $search = $request->query('search') ? $request->query('search') : '';
+
+        $users = User::select('id','name','email','status')->orderByDesc('updated_at')->where('name','like','%'.$search.'%')->get();
 
         return response()->json([
             'status' => 'success',
