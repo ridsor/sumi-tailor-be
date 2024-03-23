@@ -26,8 +26,9 @@ class OrderController extends Controller
         $page = $request->query('page') ? $request->query('page') : 1;
         $limit = $request->query('limit') ? $request->query('limit') : 5;
         $status = $request->query('status') ? $request->query('status') : 'isProcess';
+        $search = $request->query('search') ? $request->query('search') : '';
     
-        $orders = Order::orderByDesc('updated_at')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
+        $orders = Order::orderByDesc('updated_at')->where('name','like','%'.$search.'%')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
         $total = Order::where('status',$status)->count();
 
         return response()->json([
