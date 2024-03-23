@@ -24,7 +24,7 @@ Route::group(['prefix' => 'auth'], function() {
     Route::post('/login',[UserController::class, 'login']);
     Route::post('/refresh',[UserController::class, 'refresh']);
     Route::put('/logout',[UserController::class, 'logout'])->middleware('verify.token');
-    Route::delete('/delete/{id}',[UserController::class, 'delete']);
+    Route::delete('/delete/{id}',[UserController::class, 'delete'])->middleware('verify.token');
 });
 
 Route::group(['middleware' => ['verify.token']], function() {
@@ -32,8 +32,9 @@ Route::group(['middleware' => ['verify.token']], function() {
     Route::put('/orders/{order}/status',[OrderController::class, 'status']);
     Route::put('/orders/{order}/confirm',[OrderController::class, 'confirm']);
     Route::post('/orders/register-order',[OrderController::class, 'register_order']);
-    
     Route::get('/dashboard',[DashboardController::class, 'index']);
+    Route::post('/users/{id}',[UserController::class, 'update']);
+    Route::get('/users',[UserController::class, 'index']);
 });
 
 Route::get('/orders/register-order',[OrderController::class, 'get_register_order']);
