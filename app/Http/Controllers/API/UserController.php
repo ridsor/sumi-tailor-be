@@ -11,9 +11,24 @@ use Illuminate\Support\Facades\Gate;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    public function index(Request $request)
+    {
+        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
+
+        $users = User::select('id','name','email','status')->orderByDesc('updated_at')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message'=> 'Successfully fetched order data',
+            'data' => $users
+        ]);
+    }
+
     public function me(Request $request) {
         $token = $request->cookie('refreshToken');
         if(!$token) return Response('',401);
@@ -32,6 +47,7 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'image' => $user->image,
                 'role' => $user->role->name
             ]
         ]);
@@ -40,6 +56,10 @@ class UserController extends Controller
     public function register(Request $request)
     {
         if(!Gate::forUser(getAuthUser($request))->allows('is-admin-super')) return Response('',403);
+
+        $messages = [
+            'email.unique' => 'Email sudah ada',
+        ];
 
         $validator = Validator::make($request->all(),[
             'name' => 'required|max:100',
@@ -54,7 +74,7 @@ class UserController extends Controller
                 ->uncompromised(),
             ],
             'image' => 'image|mimes:jpeg,png,jpg|max:2048',
-        ]);   
+        ],$messages);   
         
         if($validator->fails()) {
             return response()->json([
@@ -195,23 +215,28 @@ class UserController extends Controller
         if(!Gate::forUser(getAuthUser($request))->allows('is-admin-super')) return Response('',403);
 
         $user = User::where('id',$id)->first();
-
+        
         if(!$user) return Response([
             'status' => 'fail',
             'message' => 'User not found'
         ],404);
-
-        User::destroy($user);
-
+        
+        User::where('id',$id)->delete();
+        
         return Response([
             'status' => 'success',
             'message' => 'Account has been deleted',
         ]);
     }
-
+    
     public function update(Request $request, $id)
     {
-        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
+        $user = getAuthUser($request);
+        if(!Gate::forUser($user)->allows('is-super-or-admin')) return Response('',403);
+
+        if(!Gate::forUser($user)->allows('is-admin-super')) {
+            if($user->id != $id) return Response('',403);
+        }
 
         $user = User::where('id',$id)->first();
 
@@ -221,10 +246,14 @@ class UserController extends Controller
         ],404);
 
         $rules = [];
-
+        
         if($request->input('profile')) {
             if($request->input('password')) {
                 $rules['password'] = [
+                    'required',
+                    'max:20',
+                ];
+                $rules['newPassword'] = [
                     'required',
                     'max:20',
                     Password::min(8)
@@ -247,18 +276,8 @@ class UserController extends Controller
             $rules['name'] = 'required|max:100';
 
             if($user->email != $request->input('email')) {
-                    $rules['email'] = 'required|email|unique:users|max:100';
-                }
-                
-            $rules['password'] = [
-                'required',
-                'max:20',
-                Password::min(8)
-                ->mixedCase()
-                ->numbers()
-                ->symbols()
-                ->uncompromised(),
-            ];
+                $rules['email'] = 'required|email|unique:users|max:100';
+            }
             
             if($request->input('image')) {
                 $rules['image'] = 'image|mimes:jpeg,png,jpg|max:2048';
@@ -280,7 +299,15 @@ class UserController extends Controller
         $validated = [];
         if($request->input('profile')) {
             if($request->input('password')) {
-                $validated = $validator->safe()->only(['password']);
+                $validated = $validator->safe()->only(['password','newPassword']);
+
+                if(!Hash::check($validated['password'], $user->password)) return Response([
+                    'status' => 'fail',
+                    'message' => 'Validation failed',
+                    'errors' => [
+                        'password' => ['Password lama tidak sesuai']
+                    ],
+                ],400);
             } else {
                 $validated =  $validator->safe()->only(['name','email']);
             }
@@ -291,8 +318,26 @@ class UserController extends Controller
         if($request->file('image')) {
             $validated['image'] = Str::random(10) . time() . '.' . $request->image->extension(); 
             $request->image->move(public_path('images'), $validated['image']);
+        
+            if($user->image) {
+                $file = public_path("images/".$user->image);
+                if(File::exists($file)) {
+                    unlink($file);
+                }
+            }
         }
 
-        User::where('id',$id)->update($validated);
+        if($request->input('profile') && $request->input('password')) {
+            User::where('id',$id)->update([
+                'password' => bcrypt($request->newPassword)
+            ]);
+        } else {
+            User::where('id',$id)->update($validated);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Successfully edited the user',
+        ]);
     }
 }
