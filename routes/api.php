@@ -35,8 +35,9 @@ Route::group(['middleware' => ['verify.token']], function() {
     Route::get('/dashboard',[DashboardController::class, 'index']);
     Route::post('/users/{id}',[UserController::class, 'update']);
     Route::get('/users',[UserController::class, 'index']);
+    Route::get('/orders/register-order',[OrderController::class, 'get_register_order']);
 });
 
-Route::get('/orders/register-order',[OrderController::class, 'get_register_order']);
+Route::get('/orders/register-order/check',[OrderController::class, 'check_register_order']);
 Route::post('/orders',[OrderController::class, 'store']);
 Route::get('/orders/{item_code}',[OrderController::class, 'show']);
