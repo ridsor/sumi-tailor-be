@@ -59,6 +59,11 @@ class UserController extends Controller
     {
         if(!Gate::forUser(getAuthUser($request))->allows('is-admin-super')) return Response('',403);
 
+        if(User::count() >= 4) return Response([
+            'status' => 'fail',
+            'message' => 'User limit is 4'
+        ],400);
+
         $messages = [
             'email.unique' => 'Email sudah ada',
         ];
