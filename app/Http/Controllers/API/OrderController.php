@@ -301,14 +301,28 @@ class OrderController extends Controller
 
         return Response([
             'status' => 'success',
-            'message' => 'Data retrieved successfully',
+            'message' => 'Data created successfully',
             'data' => [
                 'token' => $token
             ]
         ]);
     }
 
-    public function get_register_order(Request $request) {
+    public function get_register_order(Request $request)
+    {
+        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
+
+        
+        $result = Temp::latest()->first();
+        
+        return Response([
+            'status' => 'success',
+            'message' => 'Data retrieved successfully',
+            'data' => $result
+        ]);
+    }
+
+    public function check_register_order(Request $request) {
         $token = $request->query('token');
 
         if(!$token) return Response('',403);
