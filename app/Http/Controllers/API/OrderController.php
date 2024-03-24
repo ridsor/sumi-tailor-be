@@ -29,7 +29,7 @@ class OrderController extends Controller
         $search = $request->query('search') ? $request->query('search') : '';
     
         $orders = Order::orderByDesc('updated_at')->where('name','like','%'.$search.'%')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
-        $total = Order::where('status',$status)->count();
+        $total = Order::where('status',$status)->where('name','like','%'.$search.'%')->count();
 
         return response()->json([
             'status' => 'success',
