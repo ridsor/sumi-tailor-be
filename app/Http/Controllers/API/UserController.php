@@ -137,9 +137,7 @@ class UserController extends Controller
             ],401);
         }
 
-        $user = User::where('id',Auth::user()->id)->first();
-        if(!$user) return Response('',500);
-
+        $user = Auth::user();
         $token = createJWT($user);
         $refreshToken = createRefreshJWT($user);
         $tokenTime = env('JWT_TIME_TO_LIVE');

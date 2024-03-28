@@ -13,6 +13,7 @@ use App\Models\MonthlyTemp;
 use App\Models\Temp;
 use Illuminate\Support\Carbon;
 use Firebase\JWT\JWT;
+use Illuminate\Support\Facades\Cache;
 
 class OrderController extends Controller
 {
@@ -275,29 +276,22 @@ class OrderController extends Controller
     }
 
     public function register_order(Request $request) {
-        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
-        
-        $user = decodeJWT(getJWT(), env('JWT_SECRET'));
-        if(!$user) return Response('',403);
+        $user = getAuthUser($request);
+        if(!Gate::forUser($user)->allows('is-super-or-admin')) return Response('',403);
         
         $key = env('REGISTER_ORDER_JWT_SECRET');
         $tokenTime = env('REGISTER_ORDER_TOKEN_TIME_TO_LIVE');
         $requestTime = now()->timestamp;
         $requestExpired = $requestTime + $tokenTime;
         $payload = [
-            'user_id' => $user->user_id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
+            'user_id' => $user->id,
             'iat' => $requestTime,
             'exp' => $requestExpired
         ];
         
         $token = JWT::encode($payload, $key, 'HS256');
         
-        Temp::latest()->first()->update([
-            'register_order_token' => $token
-        ]);
+        Cache::forever('register_order_token', $token);
 
         return Response([
             'status' => 'success',
@@ -311,14 +305,14 @@ class OrderController extends Controller
     public function get_register_order(Request $request)
     {
         if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
-
-        
-        $result = Temp::latest()->first();
+        $token = Cache::get('register_order_token');
         
         return Response([
             'status' => 'success',
             'message' => 'Data retrieved successfully',
-            'data' => $result
+            'data' => [
+                'register_order_token' => $token
+            ]
         ]);
     }
 
@@ -333,7 +327,7 @@ class OrderController extends Controller
         $user = User::where('id',$decoded->user_id)->first();
         if(!$user) return Response('',403);
 
-        $result = Temp::where('register_order_token',$token)->first();
+        $result = Cache::get('register_order_token');
         if(!$result) return Response('',403);
 
         return Response([
