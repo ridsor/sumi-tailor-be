@@ -32,23 +32,22 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
             'role_id' => $super_admin->id,
         ]);
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('password'),
-            'role_id' => $admin->id,
-        ]);
+        // User::factory()->create([
+        //     'name' => 'Admin',
+        //     'email' => 'admin@gmail.com',
+        //     'password' => bcrypt('password'),
+        //     'role_id' => $admin->id,
+        // ]);
 
-        Order::factory(50)->create();
+        // Order::factory(50)->create();
 
 
-        MonthlyTemp::create([
-            'order_total' => 2,
-            'total_income' => 20000,
-            "created_at" =>  \Carbon\Carbon::now()->subMonth(),
-            "updated_at" => \Carbon\Carbon::now()->subMonth()
-        ]);
+        // MonthlyTemp::create([
+        //     'order_total' => 2,
+        //     'total_income' => 20000,
+        //     "created_at" =>  \Carbon\Carbon::now()->subMonth(),
+        //     "updated_at" => \Carbon\Carbon::now()->subMonth()
+        // ]);
         MonthlyTemp::create([]);
-        Temp::create();
     }
 }
