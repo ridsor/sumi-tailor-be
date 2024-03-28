@@ -49,6 +49,5 @@ class DatabaseSeeder extends Seeder
         //     "updated_at" => \Carbon\Carbon::now()->subMonth()
         // ]);
         MonthlyTemp::create([]);
-        Temp::create();
     }
 }
