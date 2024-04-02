@@ -55,11 +55,10 @@ if(!function_exists('createOrderJWT')) {
 }
 
 if(!function_exists('createRefreshJWT')) {
-  function createRefreshJWT($user) {
+  function createRefreshJWT($user, $time) {
     $key = env('REFRESH_JWT_SECRET');
-    $tokenTime = env('REFRESH_TOKEN_TIME_TO_LIVE');
     $requestTime = now()->timestamp;
-    $requestExpired = $requestTime + $tokenTime;
+    $requestExpired = $requestTime + $time;
         
     $payload = [
       'user_id' => $user->id,
@@ -96,8 +95,8 @@ if(!function_exists('getContentJWT')) {
 }
 
 if(!function_exists('getAuthUser')) {
-  function getAuthUser($request) {
-    $tokenUser = $request->cookie('refreshToken');
+  function getAuthUser() {
+    $tokenUser = getJWT();
     if(!$tokenUser) return null;   
     $keyUser = env('REFRESH_JWT_SECRET');
     $decodedUser = decodeJWT($tokenUser, $keyUser);

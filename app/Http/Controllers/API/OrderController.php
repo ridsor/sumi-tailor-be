@@ -50,7 +50,7 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) {
+        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) {
             $token = $request->query('token');
             if(!$token) return Response('',403);
             $decoded = decodeJWT($token, env('REGISTER_ORDER_JWT_SECRET'));
@@ -113,7 +113,7 @@ class OrderController extends Controller
      */
     public function show(Request $request, $item_code)
     {
-        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) {
+        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) {
             $token = $request->query('token');
             if(!$token) return Response('',403);
             $decoded = decodeJWT($token, env('ORDER_JWT_SECRET'));
@@ -144,7 +144,7 @@ class OrderController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
+        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) return Response('',403);
 
         $order = Order::where('item_code',$id)->first();
         
@@ -197,7 +197,7 @@ class OrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request,$id)
+    public function destroy(Request $request, $id)
     {   
         if(!Gate::forUser(getAuthUser($request))->allows('is-admin-super')) return Response('',403);
         $order = Order::where('item_code',$id)->first();
@@ -241,8 +241,8 @@ class OrderController extends Controller
         ]);
     }
 
-    public function confirm(Request $request, $id) {
-        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
+    public function confirm($id) {
+        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) return Response('',403);
         
         $order = Order::where('item_code',$id)->first();
         
@@ -275,8 +275,8 @@ class OrderController extends Controller
         ]);
     }
 
-    public function register_order(Request $request) {
-        $user = getAuthUser($request);
+    public function register_order() {
+        $user = getAuthUser();
         if(!Gate::forUser($user)->allows('is-super-or-admin')) return Response('',403);
         
         $key = env('REGISTER_ORDER_JWT_SECRET');
@@ -302,9 +302,9 @@ class OrderController extends Controller
         ]);
     }
 
-    public function get_register_order(Request $request)
+    public function get_register_order()
     {
-        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
+        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) return Response('',403);
         $token = Cache::get('register_order_token');
         
         return Response([
