@@ -216,7 +216,7 @@ class OrderController extends Controller
     }
 
     public function status(Request $request, $id) {
-        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
+        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) return Response('',403);
         
         $order = Order::where('item_code',$id)->first();
         
