@@ -35,9 +35,12 @@ class UserController extends Controller
         $token = getJWT();
         if(!$token) return Response('',401);
         
-        $keyToken = env('JWT_SECRET');
+        $keyToken = env('REFRESH_JWT_SECRET');
         $decoded = decodeJWT($token,$keyToken);
         if(!$decoded) return Response('',403);
+        
+        $user = User::where('id',$decoded->user_id)->first();
+        if(!$user) return Response('',403);
 
         return Response([
             'status' => 'success',
@@ -113,7 +116,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(),[
             'email' => 'required|email|max:100',
             'password' => 'required|max:20|min:8',
-            'remember_me' => 'string'
+            'remember_me' => 'boolean'
         ]);   
         if($validator->fails()) {
             return response()->json([
@@ -124,7 +127,7 @@ class UserController extends Controller
         }
         
         $validated = $validator->safe()->only(['email','password']);
-        $remember_me = $request->has('remember_me') ? $validator->safe()->only(['remember_me']) : 'false';
+        $remember_me = $request->has('remember_me') ? $validator->safe()->only(['remember_me']) : false;
         
         if(!Auth::attempt($validated)) {
             return response()->json([
@@ -135,7 +138,7 @@ class UserController extends Controller
         
         $user = Auth::user();
         $token = createJWT($user);
-        $refreshTokenTime = ($remember_me == 'true') ? env('REFRESH_TOKEN_TO_LIVE',259200) : 7200;
+        $refreshTokenTime = ($remember_me) ? env('REFRESH_TOKEN_TIME_TO_LIVE') : 7200;
         $refreshToken = createRefreshJWT($user, $refreshTokenTime);
         $tokenTime = env('JWT_TIME_TO_LIVE');
         
@@ -151,6 +154,8 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'image' => $user->image,
+                'role' => $user->role->name
             ],
             'authorization' => [
                 'access_token' => $token,
@@ -230,12 +235,17 @@ class UserController extends Controller
     
     public function update(Request $request, $id)
     {
-        $user = getAuthUser();
-        if(!Gate::forUser($user)->allows('is-super-or-admin')) return Response('',403);
+        $auth = getAuthUser();
 
-        if(!Gate::forUser($user)->allows('is-admin-super')) {
-            if($user->id != $id) return Response('',403);
+        if(!Gate::forUser($auth)->allows('is-admin-super')) {
+            if($auth->id != $id) return Response('',403);
         }
+
+        $user = User::where('id',$id)->first();
+        if(!$user) return Response([
+            'status' => 'fail',
+            'message' => 'User not found'
+        ],404);
 
         $rules = [];
         
