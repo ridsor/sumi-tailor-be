@@ -20,16 +20,17 @@ if(!function_exists('createJWT')) {
     $tokenTime = env('JWT_TIME_TO_LIVE');
     $requestTime = now()->timestamp;
     $requestExpired = $requestTime + $tokenTime;
-        
+    
     $payload = [
       'user_id' => $user->id,
       'name' => $user->name,
       'email' => $user->email,
+      'image' => $user->image,
       'role' => $user->role->name,
       'iat' => $requestTime,
       'exp' => $requestExpired
     ];
-
+    
     $token = JWT::encode($payload, $key, 'HS256');
     return $token;
   }
@@ -41,15 +42,15 @@ if(!function_exists('createOrderJWT')) {
     $tokenTime = env('ORDER_TOKEN_TIME_TO_LIVE');
     $requestTime = now()->timestamp;
     $requestExpired = $requestTime + $tokenTime;
-
+    
     $payload = [
       'item_code' => $order->item_code,
       'iat' => $requestTime,
       'exp' => $requestExpired
     ];
-
+    
     $token = JWT::encode($payload, $key, 'HS256');
-
+    
     return $token;
   }
 }
@@ -59,16 +60,17 @@ if(!function_exists('createRefreshJWT')) {
     $key = env('REFRESH_JWT_SECRET');
     $requestTime = now()->timestamp;
     $requestExpired = $requestTime + $time;
-        
+    
     $payload = [
       'user_id' => $user->id,
       'name' => $user->name,
       'email' => $user->email,
+      'image' => $user->image,
       'role' => $user->role->name,
       'iat' => $requestTime,
       'exp' => $requestExpired
     ];
-
+    
     $token = JWT::encode($payload, $key, 'HS256');
     return $token;
   }
@@ -85,20 +87,11 @@ if(!function_exists('decodeJWT')) {
   }
 }
 
-if(!function_exists('getContentJWT')) {
-  function getContentJWT() {
-    $token = getJWT();
-    $key = env('JWT_SECRET');
-    $decoded = decodeJWT($token,$key);
-    return $decoded;
-  }
-}
-
 if(!function_exists('getAuthUser')) {
   function getAuthUser() {
     $tokenUser = getJWT();
     if(!$tokenUser) return null;   
-    $keyUser = env('REFRESH_JWT_SECRET');
+    $keyUser = env('JWT_SECRET');
     $decodedUser = decodeJWT($tokenUser, $keyUser);
     if(!$decodedUser) return null;
     $user = User::where('id',$decodedUser->user_id)->first();
