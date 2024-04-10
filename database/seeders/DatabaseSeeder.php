@@ -19,24 +19,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('password'),
-            'role_id' => 3
-        ]);
-
-        Order::factory(50)->create();
-
-        Role::create([
-            'name' => 'user',
-        ]);
-        Role::create([
+        $admin = Role::create([
             'name' => 'admin',
         ]);
         Role::create([
             'name' => 'super admin',
         ]);
+
+        User::factory()->create([
+            'name' => 'Admin',
+            'email' => 'admin@gmail.com',
+            'password' => bcrypt('password'),
+            'role_id' => $admin->id,
+        ]);
+
+        Order::factory(50)->create();
+
 
         MonthlyTemp::create([
             'order_total' => 2,

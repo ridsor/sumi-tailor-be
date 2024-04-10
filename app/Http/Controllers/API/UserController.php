@@ -9,6 +9,8 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
+use App\Models\Role;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -51,7 +53,7 @@ class UserController extends Controller
                 ->symbols()
                 ->uncompromised(),
             ],
-            'role_id' => 'nullable|numeric|max:3'
+            'image' => 'image|mimes:jpeg,png,jpg|max:2048',
         ]);   
         
         if($validator->fails()) {
@@ -62,12 +64,19 @@ class UserController extends Controller
             ],400);
         }
         
-        $validated = $validator->safe()->only(['name', 'email','password','role_id']);
+        $validated = $validator->safe()->only(['name', 'email','password']);
+
+        if($request->file('image')) {
+            $validated['image'] = Str::random(10) . time() . '.' . $request->image->extension(); 
+            $request->image->move(public_path('images'), $validated['image']);
+        }
         
-        if(empty($validated['role_id'])) unset($validated['role_id']);
         $validated['password'] = bcrypt($validated['password']);
 
-        User::factory()->create($validated);
+        $role = Role::where('name','admin')->first();
+        $validated['role_id'] = $role->id;
+
+        User::create($validated);
 
         return response()->json([
             'status' => 'success',
@@ -110,7 +119,8 @@ class UserController extends Controller
         $cookieMinute = ($remember_me) ? env('REFRESH_TOKEN_TO_LIVE',259200) : 7200;
 
         User::where('id',$user->id)->update([
-            'access_token' => $refreshToken
+            'access_token' => $refreshToken,
+            'status' => now()
         ]);
 
         return response()->json([
@@ -146,6 +156,9 @@ class UserController extends Controller
         if(!$decoded) return Response('',403);
 
         $newToken = createJWT($user);
+
+        $user->status = now();
+        $user->save();
             
         return response()->json([
             'status' => 'success',                
@@ -178,7 +191,7 @@ class UserController extends Controller
         ])->withoutCookie('refreshToken');
     }
 
-    public function delete($id) {
+    public function delete(Request $request, $id) {
         if(!Gate::forUser(getAuthUser($request))->allows('is-admin-super')) return Response('',403);
 
         $user = User::where('id',$id)->first();
@@ -194,5 +207,92 @@ class UserController extends Controller
             'status' => 'success',
             'message' => 'Account has been deleted',
         ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        if(!Gate::forUser(getAuthUser($request))->allows('is-super-or-admin')) return Response('',403);
+
+        $user = User::where('id',$id)->first();
+
+        if(!$user) return Response([
+            'status' => 'fail',
+            'message' => 'User not found'
+        ],404);
+
+        $rules = [];
+
+        if($request->input('profile')) {
+            if($request->input('password')) {
+                $rules['password'] = [
+                    'required',
+                    'max:20',
+                    Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+                ];
+            } else {
+                $rules['name'] = 'required|max:100';
+
+                if($user->email != $request->input('email')) {
+                    $rules['email'] = 'required|email|unique:users|max:100';
+                }
+                if($request->file('image')) {
+                    $rules['image'] = 'image|mimes:jpeg,png,jpg|max:1048';
+                }
+            }
+        } else {
+            $rules['name'] = 'required|max:100';
+
+            if($user->email != $request->input('email')) {
+                    $rules['email'] = 'required|email|unique:users|max:100';
+                }
+                
+            $rules['password'] = [
+                'required',
+                'max:20',
+                Password::min(8)
+                ->mixedCase()
+                ->numbers()
+                ->symbols()
+                ->uncompromised(),
+            ];
+            
+            if($request->input('image')) {
+                $rules['image'] = 'image|mimes:jpeg,png,jpg|max:2048';
+            }
+        }
+        
+        $messages = [
+            'email.unique' => 'Email sudah ada',
+        ];
+
+        $validator = Validator::make($request->all(),$rules, $messages);
+
+        if($validator->fails()) return response()->json([
+            'status' => 'fail',
+            'message' => 'Validation failed',
+            'errors' => $validator->errors(),
+        ],400);
+
+        $validated = [];
+        if($request->input('profile')) {
+            if($request->input('password')) {
+                $validated = $validator->safe()->only(['password']);
+            } else {
+                $validated =  $validator->safe()->only(['name','email']);
+            }
+        } else {
+            $validated =  $validator->safe()->only(['name','email','password']);
+        }
+
+        if($request->file('image')) {
+            $validated['image'] = Str::random(10) . time() . '.' . $request->image->extension(); 
+            $request->image->move(public_path('images'), $validated['image']);
+        }
+
+        User::where('id',$id)->update($validated);
     }
 }

@@ -18,9 +18,10 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('image')->nullable();
             $table->text('access_token')->unique()->nullable();
-            $table->foreignId('role_id')->default(1);
-            $table->rememberToken();
+            $table->timestamp('status')->useCurrent();
+            $table->foreignId('role_id');
             $table->timestamps();
         });
     }
