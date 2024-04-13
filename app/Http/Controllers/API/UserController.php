@@ -39,7 +39,7 @@ class UserController extends Controller
         $decoded = decodeJWT($token,$keyToken);
         if(!$decoded) return Response('',403);
         
-        $user = User::where('id',$decoded->user_id)->first();
+        $user = User::where('access_token',$token)->first();
         if(!$user) return Response('',403);
 
         return Response([
