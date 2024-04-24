@@ -80,7 +80,7 @@ class OrderController extends Controller
         ],400);
 
         // Retrieve a portion of the validated input...
-        $validated = $validator->safe()->only(['name', 'description', 'price', 'email', 'no_hp', 'address']);
+        $validated = $validator->safe()->only(['name', 'note', 'price', 'email', 'no_hp', 'address']);
         
         $today = Carbon::now();
         $item_code = 'ST' . random_int(100,999) . $today->day . $today->month;
