@@ -68,8 +68,8 @@ class OrderController extends Controller
             'name' => 'required|max:100',
             'email' => 'required|email|unique:orders|max:100',
             'no_hp' => 'required|numeric|unique:orders',
-            'address' => 'required|max:100',
-            'description' => 'required|max:500',
+            'address' => 'required|max:1000',
+            'note' => 'required|max:1000',
             'price' => 'nullable|numeric',
         ], $messages);
 
@@ -155,8 +155,8 @@ class OrderController extends Controller
 
         $rules = [
             'name' => 'required|max:100',
-            'address' => 'required|max:100',
-            'description' => 'required|max:500',
+            'address' => 'required|max:1000',
+            'description' => 'required|max:1000',
             'price' => 'nullable|numeric',
         ];
 
