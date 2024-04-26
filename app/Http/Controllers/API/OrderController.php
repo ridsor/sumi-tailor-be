@@ -156,7 +156,7 @@ class OrderController extends Controller
         $rules = [
             'name' => 'required|max:100',
             'address' => 'required|max:1000',
-            'description' => 'required|max:1000',
+            'note' => 'required|max:1000',
             'price' => 'nullable|numeric',
         ];
 
@@ -181,7 +181,7 @@ class OrderController extends Controller
         ],400);
 
         // Retrieve a portion of the validated input...
-        $validated = $validator->safe()->only(['name', 'description', 'price', 'email', 'no_hp', 'address']);
+        $validated = $validator->safe()->only(['name', 'note', 'price', 'email', 'no_hp', 'address']);
 
         Order::where('item_code',$id)->update($validated);
 
