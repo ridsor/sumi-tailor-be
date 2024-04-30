@@ -160,7 +160,7 @@ class OrderController extends Controller
         $rules = [
             'name' => 'required|max:100',
             'address' => 'required|max:1000',
-            'description' => 'required|max:1000',
+            'note' => 'required|max:1000',
             'price' => 'nullable|numeric',
         ];
 
