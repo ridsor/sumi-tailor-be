@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\MonthlyTemp;
 use App\Models\Temp;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Cache;
 
@@ -66,11 +67,12 @@ class OrderController extends Controller
 
         $validator = Validator::make($request->all(),[
             'name' => 'required|max:100',
-            'email' => 'required|email|unique:orders|max:100',
+            'email' => 'nullable|email|unique:orders|max:100',
             'no_hp' => 'required|numeric|unique:orders',
             'address' => 'required|max:1000',
             'note' => 'required|max:1000',
             'price' => 'nullable|numeric',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048'
         ], $messages);
 
         if($validator->fails()) return response()->json([
@@ -80,11 +82,13 @@ class OrderController extends Controller
         ],400);
 
         // Retrieve a portion of the validated input...
-        $validated = $validator->safe()->only(['name', 'note', 'price', 'email', 'no_hp', 'address']);
-        
+        $validated = $validator->safe()->only(['name', 'note', 'price', 'email', 'no_hp', 'address','image']);
         $today = Carbon::now();
         $item_code = 'ST' . random_int(100,999) . $today->day . $today->month;
         $validated['item_code'] = $item_code;
+        
+        $validated['image'] = Str::random(10) . time() . '.' . $request->image->extension(); 
+        $request->image->move(public_path('order-images'), $validated['image']);
         
         $order = Order::create($validated);
 
@@ -166,10 +170,13 @@ class OrderController extends Controller
         ];
 
         if($order->email != $request->input('email')) {
-            $rules['email'] = 'required|email|unique:orders|max:100';
+            $rules['email'] = 'nullable|email|unique:orders|max:100';
         }
         if($order->no_hp != $request->input('no_hp')) {
             $rules['no_hp'] = 'required|numeric|unique:orders';
+        }
+        if($request->input('image')) {
+            $rules['image'] = 'required|image|mimes:jpeg,png,jpg|max:2048';
         }
 
         $validator = Validator::make($request->all(),$rules, $messages);
@@ -180,8 +187,19 @@ class OrderController extends Controller
             'errors' => $validator->errors(),
         ],400);
 
-        // Retrieve a portion of the validated input...
-        $validated = $validator->safe()->only(['name', 'description', 'price', 'email', 'no_hp', 'address']);
+        $validated = $validator->safe()->only(['name', 'description', 'price', 'email', 'no_hp', 'address', 'image']);
+        
+        if($validated['image']) {
+            $validated['image'] = Str::random(10) . time() . '.' . $request->image->extension(); 
+            $request->image->move(public_path('order-images'), $validated['image']);
+        
+            if($order->image) {
+                $file = public_path("order-images/".$order->image);
+                if(File::exists($file)) {
+                    unlink($file);
+                }
+            }
+        }
 
         Order::where('item_code',$id)->update($validated);
 
