@@ -211,7 +211,6 @@ class OrderController extends Controller
      */
     public function destroy(Request $request, $id)
     {   
-        if(!Gate::forUser(getAuthUser($request))->allows('is-admin-super')) return Response('',403);
         $order = Order::where('item_code',$id)->first();
         
         if(!$order) return Response([
