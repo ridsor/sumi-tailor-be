@@ -61,13 +61,11 @@ class OrderController extends Controller
         }
 
         $messages = [
-            'email.unique' => 'Email sudah ada',
             'no_hp.unique' => 'No Handphone sudah ada',
         ];
 
         $validator = Validator::make($request->all(),[
             'name' => 'required|max:100',
-            'email' => 'nullable|email|unique:orders|max:100',
             'no_hp' => 'required|numeric|unique:orders',
             'address' => 'required|max:1000',
             'note' => 'required|max:1000',
@@ -82,7 +80,7 @@ class OrderController extends Controller
         ],400);
 
         // Retrieve a portion of the validated input...
-        $validated = $validator->safe()->only(['name', 'note', 'price', 'email', 'no_hp', 'address','image']);
+        $validated = $validator->safe()->only(['name', 'note', 'price', 'no_hp', 'address','image']);
         $today = Carbon::now();
         $item_code = 'ST' . random_int(100,999) . $today->day . $today->month;
         $validated['item_code'] = $item_code;
@@ -165,13 +163,9 @@ class OrderController extends Controller
         ];
 
         $messages = [
-            'email.unique' => 'Email sudah ada',
             'no_hp.unique' => 'No Handphone sudah ada',
         ];
 
-        if($order->email != $request->input('email')) {
-            $rules['email'] = 'nullable|email|unique:orders|max:100';
-        }
         if($order->no_hp != $request->input('no_hp')) {
             $rules['no_hp'] = 'required|numeric|unique:orders';
         }
@@ -187,7 +181,7 @@ class OrderController extends Controller
             'errors' => $validator->errors(),
         ],400);
 
-        $validated = $validator->safe()->only(['name', 'description', 'price', 'email', 'no_hp', 'address', 'image']);
+        $validated = $validator->safe()->only(['name', 'description', 'price', 'no_hp', 'address', 'image']);
         
         if($validated['image']) {
             $validated['image'] = Str::random(10) . time() . '.' . $request->image->extension(); 
