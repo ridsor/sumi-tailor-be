@@ -72,7 +72,7 @@ class OrderController extends Controller
             'address' => 'required|max:1000',
             'note' => 'required|max:1000',
             'price' => 'nullable|numeric',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:5048'
         ], $messages);
 
         if($validator->fails()) return response()->json([
@@ -176,7 +176,7 @@ class OrderController extends Controller
             $rules['no_hp'] = 'required|numeric|unique:orders';
         }
         if($request->input('image')) {
-            $rules['image'] = 'required|image|mimes:jpeg,png,jpg|max:2048';
+            $rules['image'] = 'required|image|mimes:jpeg,png,jpg|max:5048';
         }
 
         $validator = Validator::make($request->all(),$rules, $messages);
