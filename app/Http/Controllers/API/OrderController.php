@@ -14,6 +14,7 @@ use App\Models\Temp;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Firebase\JWT\JWT;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 
 class OrderController extends Controller
@@ -174,35 +175,36 @@ class OrderController extends Controller
         }
 
         $validator = Validator::make($request->all(),$rules, $messages);
-
         if($validator->fails()) return response()->json([
             'status' => 'fail',
             'message' => 'Validation failed',
             'errors' => $validator->errors(),
         ],400);
-
-        $validated = $validator->safe()->only(['name', 'description', 'price', 'no_hp', 'address', 'image']);
         
-        if($validated['image']) {
+        $validated = $validator->safe()->only(['name', 'note', 'price', 'no_hp', 'address']);
+        
+        if($request->image) {
             $validated['image'] = Str::random(10) . time() . '.' . $request->image->extension(); 
             $request->image->move(public_path('order-images'), $validated['image']);
-        
+            
             if($order->image) {
-                $file = public_path("order-images/".$order->image);
+                $file = public_path("order-images\\".$order->image);
                 if(File::exists($file)) {
                     unlink($file);
                 }
             }
         }
-
+        
         Order::where('item_code',$id)->update($validated);
-
+        $order = Order::where('item_code',$id)->first();
+        
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully edited the order',
+            'data' => $order
         ]);
     }
-
+    
     /**
      * Remove the specified resource from storage.
      *

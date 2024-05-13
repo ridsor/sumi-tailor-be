@@ -28,7 +28,8 @@ Route::group(['prefix' => 'auth'], function() {
 });
 
 Route::group(['middleware' => ['verify.token']], function() {
-    Route::apiResource('/orders',OrderController::class)->except(['show','store']);
+    Route::apiResource('/orders',OrderController::class)->except(['show','update']);
+    Route::post('/orders/{order}',[OrderController::class, 'update']);
     Route::put('/orders/{order}/status',[OrderController::class, 'status']);
     Route::put('/orders/{order}/confirm',[OrderController::class, 'confirm']);
     Route::post('/orders/register-order',[OrderController::class, 'register_order']);
@@ -39,5 +40,4 @@ Route::group(['middleware' => ['verify.token']], function() {
 });
 
 Route::get('/orders/register-order/check',[OrderController::class, 'check_register_order']);
-Route::post('/orders',[OrderController::class, 'store']);
 Route::get('/orders/{item_code}',[OrderController::class, 'show']);
