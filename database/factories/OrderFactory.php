@@ -18,11 +18,11 @@ class OrderFactory extends Factory
         return [
             'item_code' => 'ST'. $this->faker->numerify('#######'),
             'name' => $this->faker->name(), 
-            'email' => $this->faker->freeEmail(),
             'no_hp' => $this->faker->numerify('08##########'),
             'address' => $this->faker->word(),
-            'description' => $this->faker->paragraph(),
+            'note' => $this->faker->paragraph(),
             'price' => $this->faker->numerify('##000'),
+            'image' => $this->faker->imageUrl(1920, 1080, 'clothes', true),
             'status' => $this->faker->randomElement(['isProcess','isFinished']),
         ];
     }
