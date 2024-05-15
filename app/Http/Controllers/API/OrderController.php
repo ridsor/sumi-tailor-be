@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\MonthlyTemp;
-use App\Models\Temp;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Firebase\JWT\JWT;
@@ -265,7 +264,7 @@ class OrderController extends Controller
         ],404);
         
         $record = MonthlyTemp::latest()->first();
-        $today = Carbon::now();
+        $today = Carbon::now('Asia/Jayapura');
         $latestRecord = Carbon::parse($record->updated_at);
         
         if($today->month == $latestRecord->month && $today->year == $latestRecord->year) {
@@ -275,8 +274,8 @@ class OrderController extends Controller
             ]);
         } else {
             MonthlyTemp::create([
-                'order_total' => $record->order_total + 1,
-                'total_income' => $record->total_income + $order->price,
+                'order_total' => 1,
+                'total_income' => $order->price,
             ]);
         }
         
