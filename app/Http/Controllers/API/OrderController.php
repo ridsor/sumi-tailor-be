@@ -51,14 +51,7 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) {
-            $token = $request->query('token');
-            if(!$token) return Response('',403);
-            $decoded = decodeJWT($token, env('REGISTER_ORDER_JWT_SECRET'));
-            if(!$decoded) return Response('',403);
-            $user = User::where('id',$decoded->user_id)->first();
-            if(!$user) return Response('',403);
-        }
+        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) return Response('',403);
 
         $messages = [
             'no_hp.unique' => 'No Handphone sudah ada',
@@ -97,12 +90,9 @@ class OrderController extends Controller
             ],500);
         }
         
-        $access_token = createOrderJWT($order);
-        
         return Response([
             'status' => 'success',
             'message' => 'Successfully added order',
-            'access_token' => $access_token,
             'data' => $order,
         ],201);
     }
@@ -115,13 +105,7 @@ class OrderController extends Controller
      */
     public function show(Request $request, $item_code)
     {
-        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) {
-            $token = $request->query('token');
-            if(!$token) return Response('',403);
-            $decoded = decodeJWT($token, env('ORDER_JWT_SECRET'));
-            if(!$decoded) return Response('',403);
-            if($decoded->item_code !== $item_code) return Response('',403);
-        }
+        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) return Response('',403);
         
         $order = Order::where('item_code',$item_code)->first();
 
@@ -284,67 +268,6 @@ class OrderController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Order successfully confirmed'
-        ]);
-    }
-
-    public function register_order() {
-        $user = getAuthUser();
-        if(!Gate::forUser($user)->allows('is-super-or-admin')) return Response('',403);
-        
-        $key = env('REGISTER_ORDER_JWT_SECRET');
-        $tokenTime = env('REGISTER_ORDER_TOKEN_TIME_TO_LIVE');
-        $requestTime = now()->timestamp;
-        $requestExpired = $requestTime + $tokenTime;
-        $payload = [
-            'user_id' => $user->id,
-            'iat' => $requestTime,
-            'exp' => $requestExpired
-        ];
-        
-        $token = JWT::encode($payload, $key, 'HS256');
-        
-        Cache::forever('register_order_token', $token);
-
-        return Response([
-            'status' => 'success',
-            'message' => 'Data created successfully',
-            'data' => [
-                'token' => $token
-            ]
-        ]);
-    }
-
-    public function get_register_order()
-    {
-        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) return Response('',403);
-        $token = Cache::get('register_order_token');
-        
-        return Response([
-            'status' => 'success',
-            'message' => 'Data retrieved successfully',
-            'data' => [
-                'register_order_token' => $token
-            ]
-        ]);
-    }
-
-    public function check_register_order(Request $request) {
-        $token = $request->query('token');
-
-        if(!$token) return Response('',403);
-
-        $key = env('REGISTER_ORDER_JWT_SECRET');
-        $decoded = decodeJWT($token,$key);
-        if(!$decoded) return Response('',403);
-        $user = User::where('id',$decoded->user_id)->first();
-        if(!$user) return Response('',403);
-
-        $result = Cache::get('register_order_token');
-        if(!$result) return Response('',403);
-
-        return Response([
-            'status' => 'success',
-            'message' => 'Token checked successfully',
         ]);
     }
 }
