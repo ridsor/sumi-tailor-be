@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\DashboardController;
+use App\Http\Controllers\API\OrderHistoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,11 +29,14 @@ Route::group(['prefix' => 'auth'], function() {
 });
 
 Route::group(['middleware' => ['verify.token']], function() {
-    Route::apiResource('/orders',OrderController::class)->except(['update']);
+    Route::apiResource('/orders',OrderController::class)->except(['index','update']);
     Route::post('/orders/{order}',[OrderController::class, 'update']);
     Route::put('/orders/{order}/status',[OrderController::class, 'status']);
     Route::put('/orders/{order}/confirm',[OrderController::class, 'confirm']);
     Route::get('/dashboard',[DashboardController::class, 'index']);
     Route::post('/users/{id}',[UserController::class, 'update']);
     Route::get('/users',[UserController::class, 'index']);
+    Route::get("/orders/history",[OrderHistoryController::class, 'index']);
 });
+
+Route::get('/orders',[OrderController::class, 'index']);
