@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
+use App\Models\OrderHistory;
 use App\Models\User;
 use App\Models\MonthlyTemp;
 use Illuminate\Support\Carbon;
@@ -25,22 +26,38 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
+        
         $page = $request->query('page') ? $request->query('page') : 1;
         $limit = $request->query('limit') ? $request->query('limit') : 5;
         $status = $request->query('status') ? $request->query('status') : 'isProcess';
         $search = $request->query('search') ? $request->query('search') : '';
     
-        $orders = Order::orderByDesc('updated_at')->where('name','like','%'.$search.'%')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
-        $total = Order::where('status',$status)->where('name','like','%'.$search.'%')->count();
+        
+        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) {
+            $orders = Order::orderByDesc('updated_at')->where('name','like','%'.$search.'%')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
+            $total = Order::where('status',$status)->where('name','like','%'.$search.'%')->count();
+            
+            return response()->json([
+                'status' => 'success',
+                'message'=> 'Successfully fetched order data',
+                'data' => $orders,
+                'page'=> $page,
+                'limit' => $limit,
+                'total' => $total,
+            ]);
+        } else {
+            $orders = Order::orderByDesc('updated_at')->select('item_code','name','price','image','updated_at','created_at')->where('name','like','%'.$search.'%')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
+            $total = Order::where('status',$status)->where('name','like','%'.$search.'%')->count();
 
-        return response()->json([
-            'status' => 'success',
-            'message'=> 'Successfully fetched order data',
-            'data' => $orders,
-            'page'=> $page,
-            'limit' => $limit,
-            'total' => $total,
-        ]);
+            return response()->json([
+                'status' => 'success',
+                'message'=> 'Successfully fetched order data',
+                'data' => $orders,
+                'page'=> $page,
+                'limit' => $limit,
+                'total' => $total,
+            ]);
+        };
     }
 
     /**
@@ -202,7 +219,18 @@ class OrderController extends Controller
             'status' => 'fail',
             'message' => 'Order data not found',
         ],404);
+
+        $description = 'Pesanan dihapus';
         
+        OrderHistory::create([
+            'item_code' => $order->item_code,
+            'name' => $order->name,
+            'no_hp' => $order->no_hp,
+            'address' => $order->address,
+            'price' => $order->price,
+            'note' => $order->note,
+            'description' => $description,
+        ]); 
         Order::where('item_code',$id)->delete();
 
         return response()->json([
@@ -262,7 +290,18 @@ class OrderController extends Controller
                 'total_income' => $order->price,
             ]);
         }
+
+        $description = "Pesanan berhasil";
         
+        OrderHistory::create([
+            'item_code' => $order->item_code,
+            'name' => $order->name,
+            'no_hp' => $order->no_hp,
+            'address' => $order->address,
+            'price' => $order->price,
+            'note' => $order->note,
+            'description' => $description,
+        ]);
         Order::where('item_code',$id)->delete();
 
         return response()->json([
