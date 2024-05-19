@@ -31,6 +31,7 @@ Route::group(['prefix' => 'auth'], function() {
 
 Route::group(['middleware' => ['verify.token']], function() {
     Route::get("/orders/history",[OrderHistoryController::class, 'index']);
+    Route::get("/orders/history/{order}",[OrderHistoryController::class, 'show']);
     Route::apiResource('/orders',OrderController::class)->except(['index','update']);
     Route::post('/orders/{order}',[OrderController::class, 'update']);
     Route::put('/orders/{order}/status',[OrderController::class, 'status']);

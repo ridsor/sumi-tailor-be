@@ -18,7 +18,7 @@ class OrderHistoryController extends Controller
         
         $orders = OrderHistory::orderByDesc('updated_at')->where('name','like','%'.$search.'%')->limit($limit)->offset(($page - 1) * $limit)->get();
         $total = OrderHistory::where('name','like','%'.$search.'%')->count();
-
+        
         return response()->json([
             'status' => 'success',
             'message'=> 'Successfully fetched order history data',
@@ -26,6 +26,22 @@ class OrderHistoryController extends Controller
             'page'=> $page,
             'limit' => $limit,
             'total' => $total,
+        ]);
+    }
+    
+    public function show(Request $request, OrderHistory $order)
+    {
+        if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) return Response('',403);
+
+        if(!$order) return Response([
+            'status' => 'fail',
+            'message' => 'Order data not found'
+        ],404);
+
+        return Response([
+            'status' => 'success',
+            'message'=> 'Successfully retrieve order data based on id',
+            'data' => $order,
         ]);
     }
 }

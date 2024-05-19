@@ -13,4 +13,9 @@ class OrderHistory extends Model
     protected $primeryKey = 'item_code';
     public $incrementing = false;
     protected $guarded = [];
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where('item_code', $value)->firstOrFail();
+    }
 }
