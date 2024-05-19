@@ -230,7 +230,9 @@ class OrderController extends Controller
             'price' => $order->price,
             'note' => $order->note,
             'description' => $description,
+            'image' => $order->image
         ]); 
+
         Order::where('item_code',$id)->delete();
 
         return response()->json([
@@ -301,7 +303,9 @@ class OrderController extends Controller
             'price' => $order->price,
             'note' => $order->note,
             'description' => $description,
+            'image' => $order->image
         ]);
+
         Order::where('item_code',$id)->delete();
 
         return response()->json([

@@ -9,7 +9,7 @@ class OrderHistory extends Model
 {
     use HasFactory;
 
-    protected $table = 'history_order';
+    protected $table = 'order_history';
     protected $primeryKey = 'item_code';
     public $incrementing = false;
     protected $guarded = [];

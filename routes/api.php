@@ -28,7 +28,9 @@ Route::group(['prefix' => 'auth'], function() {
     Route::delete('/delete/{id}',[UserController::class, 'delete'])->middleware('verify.token');
 });
 
+
 Route::group(['middleware' => ['verify.token']], function() {
+    Route::get("/orders/history",[OrderHistoryController::class, 'index']);
     Route::apiResource('/orders',OrderController::class)->except(['index','update']);
     Route::post('/orders/{order}',[OrderController::class, 'update']);
     Route::put('/orders/{order}/status',[OrderController::class, 'status']);
@@ -36,7 +38,6 @@ Route::group(['middleware' => ['verify.token']], function() {
     Route::get('/dashboard',[DashboardController::class, 'index']);
     Route::post('/users/{id}',[UserController::class, 'update']);
     Route::get('/users',[UserController::class, 'index']);
-    Route::get("/orders/history",[OrderHistoryController::class, 'index']);
 });
 
 Route::get('/orders',[OrderController::class, 'index']);

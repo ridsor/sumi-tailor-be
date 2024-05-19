@@ -21,6 +21,7 @@ class OrderHistory extends Migration
             $table->integer('price')->nullable();
             $table->text('note');
             $table->text('description');
+            $table->text('image');
             $table->timestamps();
         });
     }
