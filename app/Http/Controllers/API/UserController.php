@@ -282,7 +282,7 @@ class UserController extends Controller
             }
             
             if($request->input('image')) {
-                $rules['image'] = 'image|mimes:jpeg,png,jpg|max:2048';
+                $rules['image'] = 'image|mimes:jpeg,png,jpg|max:1048';
             }
         }
         

@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
         //     'role_id' => $admin->id,
         // ]);
 
-        // Order::factory(50)->create();
+        Order::factory(50)->create();
 
 
         // MonthlyTemp::create([
