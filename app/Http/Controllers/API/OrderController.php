@@ -180,7 +180,6 @@ class OrderController extends Controller
             'message' => 'Validation failed',
             'errors' => $validator->errors(),
         ],400);
-        
         $validated = $validator->safe()->only(['name', 'note', 'price', 'no_hp', 'address']);
         
         if($request->image) {
@@ -194,7 +193,6 @@ class OrderController extends Controller
                 }
             }
         }
-        
         Order::where('item_code',$id)->update($validated);
         $order = Order::where('item_code',$id)->first();
         
