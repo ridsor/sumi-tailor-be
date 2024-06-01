@@ -22,12 +22,12 @@ class UserController extends Controller
 
         $search = $request->query('search') ? $request->query('search') : '';
 
-        $users = User::select('id','name','email','status')->orderByDesc('updated_at')->where('name','like','%'.$search.'%')->get();
+        $users = User::join("roles","roles.id",'=','users.role_id')->select('users.id','users.name','users.email','users.image','users.status')->orderByDesc('users.updated_at')->where('users.name','like','%'.$search.'%')->get();
 
         return response()->json([
             'status' => 'success',
             'message'=> 'Successfully fetched order data',
-            'data' => $users
+            'data' => $users,
         ]);
     }
 
@@ -51,7 +51,7 @@ class UserController extends Controller
                 'email' => $user->email,
                 'image' => $user->image,
                 'role' => $user->role->name
-            ]
+            ],
         ]);
     }
 
@@ -160,12 +160,12 @@ class UserController extends Controller
             'authorization' => [
                 'access_token' => $token,
                 'type' => 'bearer',
-                'expires_in' => $tokenTime.'s'
+                'expires_in' => $tokenTime
             ],
             'refresh_token' => [
                 'token' => $refreshToken,
                 'type' => 'bearer',
-                'expires_in' => $refreshTokenTime.'s'
+                'expires_in' => $refreshTokenTime
             ]
         ],201);
     }
