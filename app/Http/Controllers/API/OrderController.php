@@ -17,6 +17,7 @@ use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 
+
 class OrderController extends Controller
 {
     /**
@@ -31,10 +32,9 @@ class OrderController extends Controller
         $limit = $request->query('limit') ? $request->query('limit') : 5;
         $status = $request->query('status') ? $request->query('status') : 'isProcess';
         $search = $request->query('search') ? $request->query('search') : '';
-    
         
         if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) {
-            $orders = Order::orderByDesc('updated_at')->where('name','like','%'.$search.'%')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
+            $orders = Order::orderByDesc('updated_at')->select('item_code','name','price','image','updated_at','created_at')->where('name','like','%'.$search.'%')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
             $total = Order::where('status',$status)->where('name','like','%'.$search.'%')->count();
             
             return response()->json([
@@ -44,11 +44,12 @@ class OrderController extends Controller
                 'page'=> $page,
                 'limit' => $limit,
                 'total' => $total,
+                'datetime' => time()
             ]);
         } else {
-            $orders = Order::orderByDesc('updated_at')->select('item_code','name','price','image','updated_at','created_at')->where('name','like','%'.$search.'%')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
+            $orders = Order::orderByDesc('updated_at')->where('name','like','%'.$search.'%')->where('status',$status)->limit($limit)->offset(($page - 1) * $limit)->get();
             $total = Order::where('status',$status)->where('name','like','%'.$search.'%')->count();
-
+            
             return response()->json([
                 'status' => 'success',
                 'message'=> 'Successfully fetched order data',
@@ -99,7 +100,7 @@ class OrderController extends Controller
         $request->image->move(public_path('order-images'), $validated['image']);
         
         $order = Order::create($validated);
-
+        
         if(!$order) {
                 return Response([
                     'status' => 'fail',
