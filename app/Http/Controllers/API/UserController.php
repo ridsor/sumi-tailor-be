@@ -127,8 +127,8 @@ class UserController extends Controller
         }
         
         $validated = $validator->safe()->only(['email','password']);
-        $remember_me = $request->has('remember_me') ? $validator->safe()->only(['remember_me']) : false;
-        
+        $remember_me = $request->has('remember_me') ? $request->remember_me : false;
+
         if(!Auth::attempt($validated)) {
             return response()->json([
                 'status' => 'fail',
@@ -138,7 +138,7 @@ class UserController extends Controller
         
         $user = Auth::user();
         $token = createJWT($user);
-        $refreshTokenTime = ($remember_me) ? env('REFRESH_TOKEN_TIME_TO_LIVE') : 7200;
+        $refreshTokenTime = ($remember_me) ? env('REFRESH_TOKEN_TIME_TO_LIVE') : "7200";
         $refreshToken = createRefreshJWT($user, $refreshTokenTime);
         $tokenTime = env('JWT_TIME_TO_LIVE');
         
