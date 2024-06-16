@@ -71,13 +71,11 @@ class OrderController extends Controller
     {
         if(!Gate::forUser(getAuthUser())->allows('is-super-or-admin')) return Response('',403);
 
-        $messages = [
-            'no_hp.unique' => 'No Handphone sudah ada',
-        ];
+        $messages = [];
 
         $validator = Validator::make($request->all(),[
             'name' => 'required|max:100',
-            'no_hp' => 'required|numeric|unique:orders',
+            'no_hp' => 'required|numeric',
             'address' => 'required|max:1000',
             'note' => 'required|max:1000',
             'price' => 'nullable|numeric',
@@ -164,12 +162,10 @@ class OrderController extends Controller
             'price' => 'nullable|numeric',
         ];
 
-        $messages = [
-            'no_hp.unique' => 'No Handphone sudah ada',
-        ];
+        $messages = [];
 
         if($order->no_hp != $request->input('no_hp')) {
-            $rules['no_hp'] = 'required|numeric|unique:orders';
+            $rules['no_hp'] = 'required|numeric';
         }
         if($request->input('image')) {
             $rules['image'] = 'required|image|mimes:jpeg,png,jpg|max:5048';
