@@ -10,6 +10,7 @@
     "require": {
         "php": "^7.3|^8.0",
         "carbonphp/carbon-doctrine-types": "^2.1",
+        "cyberwizard/dbsafeguard": "dev-main",
         "doctrine/dbal": "^3.0",
         "firebase/php-jwt": "^6.4",
         "fruitcake/laravel-cors": "^2.0",
