@@ -10,13 +10,15 @@
     "require": {
         "php": "^7.3|^8.0",
         "carbonphp/carbon-doctrine-types": "^2.1",
+        "cyberwizard/dbsafeguard": "dev-main",
         "doctrine/dbal": "^3.0",
         "firebase/php-jwt": "^6.4",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "intervention/image": "^3.6",
         "laravel/framework": "^8.75",
-        "laravel/tinker": "^2.5"
+        "laravel/tinker": "^2.5",
+        "nao-pon/flysystem-google-drive": "~1.1"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

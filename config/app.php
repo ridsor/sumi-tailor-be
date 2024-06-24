@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'Asia/Jayapura',
+    'timezone' => env('APP_TIMEZONE'),
 
     /*
     |--------------------------------------------------------------------------
@@ -174,6 +174,9 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+
+        App\Providers\GoogleDriveServiceProvider::class,
+
     ],
 
     /*
