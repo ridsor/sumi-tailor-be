@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class DeleteOldOrder implements ShouldQueue
 {
@@ -31,6 +32,14 @@ class DeleteOldOrder implements ShouldQueue
      */
     public function handle()
     {
-        DB::delete("DELETE FROM order_history WHERE updated_at <= NOW() - INTERVAL 6 MONTH");
+        $orders = DB::table('order_history')->select('image')->whereRaw("updated_at <= NOW() - INTERVAL 7 MONTH");
+        $data = $orders->get();
+        $orders->delete();
+        foreach($data as $order) {
+            $file = public_path("order-images\\".$order->image);
+            if(File::exists($file)) {
+                unlink($file);
+            }
+        }
     }
 }
