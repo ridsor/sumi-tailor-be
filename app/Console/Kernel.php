@@ -18,7 +18,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->job(new DeleteOldOrder)->monthly()->timezone(env('APP_TIMEZONE'));
-        $schedule->job(new BackupDatabase)->weekly()->timezone(env('APP_TIMEZONE'));
+        $schedule->job(new BackupDatabase)->everyMinute()->timezone(env('APP_TIMEZONE'));
     }
 
     /**

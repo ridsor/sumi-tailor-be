@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -38,8 +39,12 @@ class BackupDatabase implements ShouldQueue
         $backupPath = 'storage/app/backups';
 
         File::ensureDirectoryExists($backupPath);
-        $backupFilePath = $backupPath . '/' . date('Y-m-d_H-i-s') . '_backup.sql';
+        $backupFilePath = $backupPath . '/';
+        $nameFile = date('Y-m-d_H-i-s') . '_backup.sql';
+        $backupFilePath .= $nameFile;
         $command = "mysqldump -u ".$username." --password=".$password." $database > $backupFilePath";
         exec($command);
+
+        Storage::disk('google')->put($nameFile, Storage::disk('local')->get('backups/'.$nameFile));
     }
 }
