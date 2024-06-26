@@ -39,18 +39,15 @@ class BackupDatabase implements ShouldQueue
         $username = env('DB_USERNAME');
         $password = env('DB_PASSWORD');
 
-        $backupPath = storage_path('app\backups');
+        $backupPath = storage_path('app/backups');
 
-        File::ensureDirectoryExists($backupPath."/sql");
+        File::ensureDirectoryExists($backupPath."/sql"); 
         File::ensureDirectoryExists($backupPath."/image");
-        $backupFilePath = $backupPath . "/sql/";
+        $backupFilePathSQL = $backupPath . "/sql/";
         $nameFile = date('Y-m-d_H-i-s') . '_backup.sql';
-        $backupFilePath .= $nameFile;
-        $command = "mysqldump -u ".$username." --password=".$password." $database > $backupFilePath";
-        exec($command);
+        $backupFilePathSQL .= $nameFile;
 
-        $orders = DB::table('order_history')->select('image')->whereRaw("updated_at >= NOW() - INTERVAL 1 WEEK")->get();
-        $nameFileZip = date('Y-m-d_H-i-s').'_order_images.zip';
+        $nameFileZip = 'order_images.zip';
         
         $destinationFileZip = $backupPath."\\image\\".$nameFileZip;
         $sourceFolder = public_path('order-images');
@@ -62,16 +59,14 @@ class BackupDatabase implements ShouldQueue
             
             foreach ($files as $key => $value) {
                 $relativeNameInZipFile = basename($value);
-
-                foreach($orders as $order) {
-                    if($order->image == $relativeNameInZipFile) {
-                        $zip->addFile($value, $relativeNameInZipFile);
-                    }
-                }
+                $zip->addFile($value, $relativeNameInZipFile);
             }
              
             $zip->close();
         }
+
+        $command = "mysqldump -u ".$username." --password=".$password." $database > $backupFilePathSQL";
+        exec($command);
 
         Storage::disk('google')->put($nameFile, Storage::disk('local')->get('backups/sql/'.$nameFile));
         Storage::disk('google')->put($nameFileZip, Storage::disk('local')->get('backups/image/'.$nameFileZip));
