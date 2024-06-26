@@ -18,7 +18,7 @@ return [
     'paths' => ['/*'],
 
     'allowed_methods' => ['*'],
-
+  
     'allowed_origins' => ['https://sumitailor.my.id','https://www.sumitailor.my.id'],
 
     'allowed_origins_patterns' => [],
