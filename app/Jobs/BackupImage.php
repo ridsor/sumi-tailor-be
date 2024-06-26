@@ -10,11 +10,10 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\DB;
 use ZipArchive;
 use File as LFile;
 
-class BackupDatabase implements ShouldQueue
+class BackupImage implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -35,17 +34,9 @@ class BackupDatabase implements ShouldQueue
      */
     public function handle()
     {
-        $database = env('DB_DATABASE');
-        $username = env('DB_USERNAME');
-        $password = env('DB_PASSWORD');
-
         $backupPath = storage_path('app/backups');
 
-        File::ensureDirectoryExists($backupPath."/sql"); 
         File::ensureDirectoryExists($backupPath."/image");
-        $backupFilePathSQL = $backupPath . "/sql/";
-        $nameFile = date('Y-m-d_H-i-s') . '_backup.sql';
-        $backupFilePathSQL .= $nameFile;
 
         $nameFileZip = (env('APP_ENV') == 'production') ? 'order_images.zip':'tes_order_images.zip';
         $pathFileZip = (env('APP_ENV') == 'production') ? '14YUiRWNdprZBSK1PBPHkKgCnZ52vyus2':'13BRbtlwjhiKmkVSvyE3brYShWCm3EXMU';
@@ -65,12 +56,7 @@ class BackupDatabase implements ShouldQueue
              
             $zip->close();
         }
-
-        $command = "mysqldump -u ".$username." --password=".$password." $database > $backupFilePathSQL";
-        exec($command);
         
-        
-        Storage::disk('google')->put($nameFile, Storage::disk('local')->get('backups/sql/'.$nameFile));
         Storage::disk('google')->put($pathFileZip, Storage::disk('local')->get('backups/image/'.$nameFileZip));
         Storage::disk('local')->delete('backups/image/'.$nameFileZip);
     }

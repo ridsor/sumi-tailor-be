@@ -5,7 +5,7 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\DeleteOldOrder;
-use App\Jobs\BackupDatabase;
+use App\Jobs\BackupImage;
 
 class Kernel extends ConsoleKernel
 {
@@ -18,7 +18,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->job(new DeleteOldOrder)->monthly()->timezone(env('APP_TIMEZONE'));
-        $schedule->job(new BackupDatabase)->weekly()->timezone(env('APP_TIMEZONE'));
+        $schedule->job(new BackupImage)->weekly()->timezone(env('APP_TIMEZONE'));
+        $schedule->command('backup:run')->weekly()->timezone(env('APP_TIMEZONE'));
     }
 
     /**
