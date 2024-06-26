@@ -60,7 +60,6 @@ class BackupDatabase implements ShouldQueue
             foreach ($files as $key => $value) {
                 $relativeNameInZipFile = basename($value);
                 $zip->addFile($value, $relativeNameInZipFile);
-
             }
              
             $zip->close();
