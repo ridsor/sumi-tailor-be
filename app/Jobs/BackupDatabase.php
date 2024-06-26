@@ -47,9 +47,10 @@ class BackupDatabase implements ShouldQueue
         $nameFile = date('Y-m-d_H-i-s') . '_backup.sql';
         $backupFilePathSQL .= $nameFile;
 
-        $nameFileZip = 'order_images.zip';
+        $nameFileZip = (env('APP_ENV') == 'production') ? 'order_images.zip':'tes_order_images.zip';
+        $pathFileZip = (env('APP_ENV') == 'production') ? '14YUiRWNdprZBSK1PBPHkKgCnZ52vyus2':'13BRbtlwjhiKmkVSvyE3brYShWCm3EXMU';
         
-        $destinationFileZip = $backupPath."\\image\\".$nameFileZip;
+        $destinationFileZip = $backupPath."/image/".$nameFileZip;
         $sourceFolder = public_path('order-images');
         $zip = new ZipArchive;
         
@@ -60,7 +61,6 @@ class BackupDatabase implements ShouldQueue
             foreach ($files as $key => $value) {
                 $relativeNameInZipFile = basename($value);
                 $zip->addFile($value, $relativeNameInZipFile);
-
             }
              
             $zip->close();
@@ -68,9 +68,10 @@ class BackupDatabase implements ShouldQueue
 
         $command = "mysqldump -u ".$username." --password=".$password." $database > $backupFilePathSQL";
         exec($command);
-
+        
+        
         Storage::disk('google')->put($nameFile, Storage::disk('local')->get('backups/sql/'.$nameFile));
-        Storage::disk('google')->put($nameFileZip, Storage::disk('local')->get('backups/image/'.$nameFileZip));
+        Storage::disk('google')->put($pathFileZip, Storage::disk('local')->get('backups/image/'.$nameFileZip));
         Storage::disk('local')->delete('backups/image/'.$nameFileZip);
     }
 }
