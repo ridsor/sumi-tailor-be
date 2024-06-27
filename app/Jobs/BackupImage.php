@@ -42,9 +42,9 @@ class BackupImage implements ShouldQueue
         $pathFileZip = (env('APP_ENV') == 'production') ? '14YUiRWNdprZBSK1PBPHkKgCnZ52vyus2':'13BRbtlwjhiKmkVSvyE3brYShWCm3EXMU';
         
         $destinationFileZip = $backupPath."/image/".$nameFileZip;
-        $sourceFolder = public_path('order-images');
-        $zip = new ZipArchive;
-        
+        $sourceFolder = (env('APP_ENV') == 'production') ? "/home/rids8499/public_html/api.sumitailor.ridsor.my.id/order-images": public_path('order-images');
+         
+        $zip = new ZipArchive();
         if ($zip->open($destinationFileZip, ZipArchive::CREATE) === TRUE)
         {
             $files = LFile::files($sourceFolder);
@@ -56,8 +56,6 @@ class BackupImage implements ShouldQueue
              
             $zip->close();
         }
-        
         Storage::disk('google')->put($pathFileZip, Storage::disk('local')->get('backups/image/'.$nameFileZip));
-        Storage::disk('local')->delete('backups/image/'.$nameFileZip);
     }
 }
