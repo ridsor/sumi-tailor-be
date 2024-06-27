@@ -25,7 +25,6 @@ class BackupDatabase extends Command
      * @var string
      */
     protected $description = 'Backup Database';
-    private $namefilesql;
 
     /**
      * Create a new command instance.
@@ -36,19 +35,6 @@ class BackupDatabase extends Command
     {
         parent::__construct();
 
-        $database = env('DB_DATABASE');
-        $username = env('DB_USERNAME');
-        $password = env('DB_PASSWORD');
-
-        $backupPath = storage_path('app/backups');
-
-        File::ensureDirectoryExists($backupPath."/sql");
-        $backupFilePathSQL = $backupPath . "/sql/";
-        $this->namefilesql = date('Y-m-d_H-i-s') . '_backup.sql';
-        $backupFilePathSQL .= $this->namefilesql;
-        $command = "mysqldump -u ".$username." --password=".$password." $database > $backupFilePathSQL";
-
-        $this->process =  Process::fromShellCommandline($command);
     }
     
     /**
@@ -58,8 +44,20 @@ class BackupDatabase extends Command
      */
     public function handle(): void
     {
-        $this->process->run(null, ['MESSAGE' => 'Something to output']);
+        $database = env('DB_DATABASE');
+        $username = env('DB_USERNAME');
+        $password = env('DB_PASSWORD');
+
+        $backupPath = storage_path('app/backups');
+
+        File::ensureDirectoryExists($backupPath."/sql");
+        $backupFilePathSQL = $backupPath . "/sql/";
+        $nameFile = date('Y-m-d_H-i-s') . '_backup.sql';
+        $backupFilePathSQL .= $nameFile;
+        $command = "mysqldump -u $username --password=\"$password\" $database > $backupFilePathSQL";
+
+        exec($command);
         
-        Storage::disk('google')->put($this->namefilesql, Storage::disk('local')->get('backups/sql/'.$this->namefilesql));
+        Storage::disk('google')->put($nameFile, Storage::disk('local')->get('backups/sql/'.$nameFile));
     }
 }
